@@ -1,1 +1,0 @@
-print([1,1,1]*[[1,1,[1,1,1],1],1,1]) # can't multiply sequence by non-int of type 'list'
