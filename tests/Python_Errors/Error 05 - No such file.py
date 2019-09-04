@@ -1,0 +1,1 @@
+file = open("nic.nic",'r') # [Errno 2] No such file or directory: 'nic.nic'

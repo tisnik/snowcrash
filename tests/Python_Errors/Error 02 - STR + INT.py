@@ -1,0 +1,1 @@
+print("Hallo world "+1) # can only concatenate str (not "int") to str

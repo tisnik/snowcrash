@@ -1,0 +1,1 @@
+from module import * # No module named 'module'
