@@ -1,5 +1,5 @@
 """This is module for import classes to sorting Errors\n
-Errors, Python_error, Java_error, Node_JS_error, C_error, C_sharp_errors, C_plus_plus_errors
+Errors, Python_error, Java_error, Node_JS_error, C_error, C_sharp_error, C_plus_plus_error
 """
 
 class Error:
@@ -23,12 +23,12 @@ class C_error(Error):
     Line is a pozition of error"""
     def __init__(self,line):
         self.error=Error(line)
-class C_sharp_errors(Error):
+class C_sharp_error(Error):
     """This is the class for sorting C# errors\n
     Line is a pozition of error"""
     def __init__(self,line):
         self.error=Error(line)
-class C_plus_plus_errors(Error):
+class C_plus_plus_error(Error):
     """This is the class for sorting C++ errors\n
     Line is a pozition of error"""
     def __init__(self,line):
