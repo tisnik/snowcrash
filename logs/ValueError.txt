@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "tests/Python_Errors/ValueError.py", line 1, in <module>
+    int("a")
+ValueError: invalid literal for int() with base 10: 'a'
+

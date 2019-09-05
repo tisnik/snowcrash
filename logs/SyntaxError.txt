@@ -1,0 +1,5 @@
+File "tests/Python_Errors/SyntaxError.py", line 1
+    5=71 # can't assign to literal
+    ^
+SyntaxError: can't assign to literal
+

@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "tests/Python_Errors/FileNotFoundError.py", line 1, in <module>
+    file = open("nic.nic",'r') # [Errno 2] No such file or directory: 'nic.nic'
+FileNotFoundError: [Errno 2] No such file or directory: 'nic.nic'
+

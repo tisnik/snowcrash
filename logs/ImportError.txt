@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "tests/Python_Errors/ImportError.py", line 1, in <module>
+    from random import someting #cannot import name 'someting' from 'random'
+ImportError: cannot import name 'someting'
+
