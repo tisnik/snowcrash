@@ -12,11 +12,16 @@ class Error:
 
 
 
+
+
 class Python_error(Error):
     """This is the class for sorting Python errors\n
     Line is a pozition of error"""
     def __init__(self,log,line):
-        self.error=Error(log,line)
+        super.__init__(log,line)
+    
+    def remake_log(self):
+        pass
 
 
 class Java_error(Error):
