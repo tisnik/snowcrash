@@ -19,11 +19,9 @@ class Python_error(Error):
     """This is the class for sorting Python errors\n
     Line is a pozition of error"""
     def __init__(self,log,line):
-        self.error=Error(log,line)
         super().__init__(log,line)
         self.remake_log()
         self.control_line()
-        print(self.line)
 
     def remake_log(self):
         self.add_error_type(self.log[len(self.log)-1])
@@ -90,5 +88,9 @@ class Node_JS_error(Error):
     """This is the class for sorting JavaScript errors\n
     Line is a pozition of error"""
 
-    def __init__(self, log, line):
-        self.error = Error(log, line)
+    def __init__(self,log,line):
+        self.error=Error(log,line)
+        
+Python_error(["Traceback (most recent call last):",  "File \"tests/Python_Errors/AssertionError.py\", line 15, in <module>", " assertSom(\"as\")", "  File \"tests/Python_Errors/AssertionError.py\", line 11, in assertSom","    assert (some==\"\"), \"Somefing","AssertionError: Somefing"],2)
+Python_error(["Traceback (most recent call last):","  File \"tests/Python_Errors/TypeError.py\", line 1, in <module>","    print(\"Hallo world \"+1) # can only concatenate str (not \"int\") to str","TypeError: must be str, not int"],1)
+
