@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "tests/Python_Errors/AttributeError.py", line 5, in <module>
+    print(a.some)
+AttributeError: 'some' object has no attribute 'some'
+

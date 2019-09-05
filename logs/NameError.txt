@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "tests/Python_Errors/NameError.py", line 1, in <module>
+    name 
+NameError: name 'name' is not defined

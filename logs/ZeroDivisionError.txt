@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "tests/Python_Errors/ZeroDivisionError.py", line 1, in <module>
+    a=5/0 # division by zero
+ZeroDivisionError: division by zero
+
