@@ -14,6 +14,7 @@ class Error:
 
 
 
+
 class Python_error(Error):
     """This is the class for sorting Python errors\n
     Line is a pozition of error"""
