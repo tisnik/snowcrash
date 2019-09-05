@@ -46,7 +46,7 @@ class C_plus_plus_error(Error):
     def __init__(self,log,line):
         self.error=Error(log,line)
 
-        
+
 class Node_JS_error(Error):
     """This is the class for sorting JavaScript errors\n
     Line is a pozition of error"""
