@@ -2,9 +2,20 @@ import ErrorClass
 import bug_search
 import language_identity
 
-with open("../tests/logs/java/ConnectException.log") as java, open("../tests/logs/python/AssertionError.txt") as python:
-    errors = [bug_search.get_error_from_log(java.read()),bug_search.get_error_from_log(python.read())]
-    for error in errors:
-        error = language_identity.identify(error)
-        print(error)
+import os
+
+errors=[]
+for root, dirs, files in os.walk("../tests/logs/python"):
+    for filename in files:
+        errors.append(open("../tests/logs/python/"+filename))
+for root, dirs, files in os.walk("../tests/logs/java"):
+    for filename in files:
+        errors.append(open("../tests/logs/java/"+filename))
+for i in range(len(errors)):
+    errors[i]=bug_search.get_error_from_log(errors[i].read())
+for i in range(len(errors)):
+    errors[i] = language_identity.identify(errors[i])
+    print(errors[i])
+for i in range(len(errors)):
+    print(errors[i])
 
