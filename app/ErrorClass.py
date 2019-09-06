@@ -16,9 +16,9 @@ class Error:
         output = "Error Log: \n"
         output+="".join(list(map(lambda x: x+"\n", self.log)))
         output+="----------\n"
-        output+="Error Type: "+self.error_type
-        output+="\nError massage: "+self.error_msg
-        output+="\nError File: "+self.path
+        output+="Error Type: "+str(self.error_type)
+        output+="\nError massage: "+str(self.error_msg)
+        output+="\nError File: "+str(self.path)
         output+="\nError Line: "+str(self.line)
         output+="\n----------"
         return output
