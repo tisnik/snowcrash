@@ -73,7 +73,8 @@ class Java_error(Error):
     def remake_log(self):
         first, last = self.log[0], self.log[-1]
         if ":" in first:
-            first, self.error_msg = first.split(":")
+            first, *self.error_msg = first.split(":")
+            self.error_msg = "".join(self.error_msg)
         else:
             self.error_msg = "None"
         self.error_type = first.split(" ")[-1]
