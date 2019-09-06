@@ -40,8 +40,12 @@ class Python_error(Error):
         #print(super())
 
     def add_error_type_and_msg(self,last):
-        self.error_type=last.split(":")[0]
-        self.error_msg=last.split(":")[1][1::]
+        if ":" in last:
+            self.error_type=last.split(":")[0]
+            self.error_msg=last.split(":")[1][1::]
+        else:
+            self.error_type=last
+            self.error_msg=None
 
     def control_line(self):
         for row in self.log:
