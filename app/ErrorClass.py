@@ -7,8 +7,8 @@ class Error:
     """This is the class for sorting each type of errors\n
     Line is a pozition of error"""
 
-    def __init__(self, log, line):
-        self.line = line
+    def __init__(self, log):
+        self.line = None
         self.log = log
 
 
@@ -18,39 +18,51 @@ class Error:
 class Python_error(Error):
     """This is the class for sorting Python errors\n
     Line is a pozition of error"""
-    def __init__(self,log,line):
-        super().__init__(log,line)
+    def __init__(self,log):
+        super().__init__(log)
         self.remake_log()
-        self.control_line()
+
+    def __str__(self):
+        output=""
+        for row in self.log:
+            output+=row+"\n"
+        output+="----------\n"
+        output+="Error Type: "+self.error_type
+        output+="\nError massage: "+self.error_msg
+        output+="\nError File: "+self.path
+        output+="\nError Line: "+str(self.line)
+        output+="\n----------"
+        return output 
 
     def remake_log(self):
-        self.add_error_type(self.log[len(self.log)-1])
+        self.add_error_type_and_msg(self.log[len(self.log)-1])
+        self.control_line()
+        self.add_fill_path()
+        print(self)
 
-    def add_error_type(self,last):
-        stop=False
-        self.error_type=""
-        for char in last:
-            if char==":":
-                stop=True
-            elif stop==False:
-                self.error_type+=char
+    def add_error_type_and_msg(self,last):
+        self.error_type=last.split(":")[0]
+        self.error_msg=last.split(":")[1][1::]
 
     def control_line(self):
         for row in self.log:
             if "File \"" in row and ", line " in row:
-                loaded=False
-                number=""
-                for index in range(len(row)):
-                    if row[index]==",":
-                        loaded=False
-                    if loaded==True and row[index]!=" ":
-                        number+=row[index]
-                    if row[index]=="e":
-                        if row[index-3:index+1]=="line":
-                            loaded=True
-        if self.line!=int(number):
-            self.line=int(number)
+                line=row.split(",")[-2]
+                line=line[1::].split(" ")[-1]
+        self.line=int(line)
 
+
+    def add_fill_path(self):
+        self.path=""
+        for row in self.log:
+            if "File \"" in row and ", line " in row:
+                path=row.split("\"")[1:len(row.split("\""))-1]
+                fill_path=""
+                for i in path:
+                    fill_path+=i
+        self.path=fill_path
+                    
+                
 
 class Java_error(Error):
     """This is the class for sorting Java errors\n
@@ -91,6 +103,6 @@ class Node_JS_error(Error):
     def __init__(self,log,line):
         self.error=Error(log,line)
         
-Python_error(["Traceback (most recent call last):",  "File \"tests/Python_Errors/AssertionError.py\", line 15, in <module>", " assertSom(\"as\")", "  File \"tests/Python_Errors/AssertionError.py\", line 11, in assertSom","    assert (some==\"\"), \"Somefing","AssertionError: Somefing"],2)
-Python_error(["Traceback (most recent call last):","  File \"tests/Python_Errors/TypeError.py\", line 1, in <module>","    print(\"Hallo world \"+1) # can only concatenate str (not \"int\") to str","TypeError: must be str, not int"],1)
+Python_error(["Traceback (most recent call last):",  "File \"tests/Python_Errors/AssertionError.py\", line 15, in <module>", " assertSom(\"as\")", "  File \"tests/Python_Errors/Letadlo23.py\", line 11, in assertSom","    assert (some==\"\"), \"Somefing","AssertionError: Somefing"])
+Python_error(["Traceback (most recent call last):","  File \"tests/Python_Errors/TypeError.py\", line 1, in <module>","    print(\"Hallo world \"+1) # can only concatenate str (not \"int\") to str","TypeError: must be str, not int"])
 
