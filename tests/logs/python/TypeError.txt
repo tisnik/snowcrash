@@ -2,4 +2,3 @@ Traceback (most recent call last):
   File "tests/Python_Errors/TypeError.py", line 1, in <module>
     print("Hallo world "+1) # can only concatenate str (not "int") to str
 TypeError: must be str, not int
-
