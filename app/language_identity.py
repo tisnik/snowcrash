@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+
+from re import match
 from constants import *
 
 
-def identify(log, indentificators=IDENTIFICATORS):
-    for identificator in indentificators:
-        if identificator[0] == log[0][identificator[1]:identificator[1] + len(identificator[0])]:
-            error = DICTIONARY[0](log)
+def identify(log):
+    for pattern in patterns:
+        if match(pattern, log[1]):
+            error = patterns[pattern]
             return error
     return False
