@@ -12,6 +12,17 @@ class Error:
         self.path = None
         self.log=log
 
+    def __str__(self):
+        output = "Error Log: \n"
+        output+="".join(list(map(lambda x: x+"\n", self.log)))
+        output+="----------\n"
+        output+="Error Type: "+self.error_type
+        output+="\nError massage: "+self.error_msg
+        output+="\nError File: "+self.path
+        output+="\nError Line: "+str(self.line)
+        output+="\n----------"
+        return output
+
 
 
 class Python_error(Error):
@@ -21,23 +32,12 @@ class Python_error(Error):
         super().__init__(log)
         self.remake_log()
 
-    def __str__(self):
-        output=""
-        for row in self.log:
-            output+=row+"\n"
-        output+="----------\n"
-        output+="Error Type: "+self.error_type
-        output+="\nError massage: "+self.error_msg
-        output+="\nError File: "+self.path
-        output+="\nError Line: "+str(self.line)
-        output+="\n----------"
-        return output 
 
     def remake_log(self):
         self.add_error_type_and_msg(self.log[len(self.log)-1])
         self.control_line()
         self.add_fill_path()
-        print(self)
+        print(super())
 
     def add_error_type_and_msg(self,last):
         self.error_type=last.split(":")[0]
@@ -79,6 +79,7 @@ class Java_error(Error):
             last = last.split("(")[1].split(":")
             self.path = last[0]
             self.line = int(last[1].replace(")", ""))
+        print(super())
 
 class C_error(Error):
     """This is the class for sorting C errors\n
