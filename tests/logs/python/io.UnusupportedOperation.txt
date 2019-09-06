@@ -1,3 +1,4 @@
-file = open("file.txt",'a')
-file = open("file.txt",'r')
-file.write(" ") # not writable
+Traceback (most recent call last):
+  File "c:\Users\Albatros\Desktop\data\Praxe 4.Ročník\git\snowcrash\tests\programs\python\io.UnusupportedOperation.py", line 3, in <module>
+    file.write(" ") # not writable
+io.UnsupportedOperation: not writable
