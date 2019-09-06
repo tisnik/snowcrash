@@ -6,7 +6,7 @@ from constants import *
 
 def identify(log):
     for pattern in patterns:
-        if match(pattern, log[1]):
+        if match(pattern, log[1]) or match(pattern, log[0]):
             error = patterns[pattern](log)
             return error
     return False
