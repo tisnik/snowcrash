@@ -2,7 +2,7 @@ import ErrorClass
 import bug_search
 import language_identity
 
-with open("../tests/logs/java/StackOwerFlow.log") as java, open("../tests/logs/python/AssertionError.txt") as python:
+with open("../tests/logs/java/ConnectException.log") as java, open("../tests/logs/python/AssertionError.txt") as python:
     err1 = bug_search.get_error_from_log(java.read())
     err2 = bug_search.get_error_from_log(python.read())
 
