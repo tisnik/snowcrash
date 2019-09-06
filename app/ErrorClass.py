@@ -12,15 +12,6 @@ class Error:
         self.path = None
         self.log=log
 
-
-
-class Python_error(Error):
-    """This is the class for sorting Python errors\n
-    Line is a pozition of error"""
-    def __init__(self,log):
-        super().__init__(log)
-        self.remake_log()
-
     def __str__(self):
         output=""
         for row in self.log:
@@ -33,11 +24,20 @@ class Python_error(Error):
         output+="\n----------"
         return output 
 
+
+
+class Python_error(Error):
+    """This is the class for sorting Python errors\n
+    Line is a pozition of error"""
+    def __init__(self,log):
+        super().__init__(log)
+        self.remake_log()
+
     def remake_log(self):
         self.add_error_type_and_msg(self.log[len(self.log)-1])
         self.control_line()
         self.add_fill_path()
-        print(self)
+        print(super())
 
     def add_error_type_and_msg(self,last):
         self.error_type=last.split(":")[0]
