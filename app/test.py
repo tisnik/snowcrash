@@ -16,6 +16,3 @@ for i in range(len(errors)):
 for i in range(len(errors)):
     errors[i] = language_identity.identify(errors[i])
     print(errors[i])
-for i in range(len(errors)):
-    print(errors[i])
-
