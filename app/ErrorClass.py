@@ -13,7 +13,7 @@ class Error:
         self.log=log
 
     def __str__(self):
-        output = "Error Log: \n"
+        output = ""#Error Log: \n"
         #output+="".join(list(map(lambda x: x+"\n", self.log)))
         output+="----------\n"
         output+="Error Type: "+str(self.error_type)
@@ -37,7 +37,7 @@ class Python_error(Error):
         self.add_error_type_and_msg(self.log[len(self.log)-1])
         self.control_line()
         self.add_fill_path()
-        print(super())
+        #print(super())
 
     def add_error_type_and_msg(self,last):
         self.error_type=last.split(":")[0]
@@ -82,7 +82,7 @@ class Java_error(Error):
             last = last.split("(")[1].split(":")
             self.path = last[0]
             self.line = int(last[1].replace(")", ""))
-        print(super())
+        #print(super())
 
 class C_error(Error):
     """This is the class for sorting C errors\n
