@@ -71,9 +71,13 @@ class Java_error(Error):
         self.remake_log()
 
     def remake_log(self):
-        first = self.log[0].split(":")
-        self.error_type = first[0].split(" ")[-1]
-        self.error_msg = first[1]
+        if ":" in self.log[0]:
+            first = self.log[0].split(":")
+            self.error_type = first[0].split(" ")[-1]
+            self.error_msg = first[1]
+        else:
+            self.error_type = "Undefined"
+            self.error_msg = "None"
         last = self.log[-1]
         if ":" in last:
             last = last.split("(")[1].split(":")

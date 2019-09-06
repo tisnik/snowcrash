@@ -18,7 +18,7 @@ def get_line_of_error(log):
 def get_error_from_log(log):
     line = get_line_of_error(log)
     log = log.split("\n")
-    return "\n".join(log[line:])
+    return log[line:-1]
 
 
 if __name__ == "__main__":
