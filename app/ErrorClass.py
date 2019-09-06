@@ -14,7 +14,7 @@ class Error:
 
     def __str__(self):
         output = "Error Log: \n"
-        output+="".join(list(map(lambda x: x+"\n", self.log)))
+        #output+="".join(list(map(lambda x: x+"\n", self.log)))
         output+="----------\n"
         output+="Error Type: "+str(self.error_type)
         output+="\nError massage: "+str(self.error_msg)
