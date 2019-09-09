@@ -1,4 +1,5 @@
-import constants
+from app import constants
+from app.ErrorClass import *
 import re
 
 ''' Getting start line of error'''
@@ -9,7 +10,10 @@ def get_line_of_error(log):
     for line_number, line in enumerate(log.split("\n"), 1):
         for err in errors.keys():
             if re.match(err, line):
-                return line_number - 2
+                if not (line[0] == " ") and errors[err] is Python_error:
+                    return line_number - 2
+                else:
+                    return line_number - 1
 
 
 ''' Separating error form log '''
