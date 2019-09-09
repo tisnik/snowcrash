@@ -2,13 +2,15 @@
 FROM python:3.7
 
 # Set the working directory to /app
-WORKDIR /app
+WORKDIR /main
 
 # Copy the current directory contents into the container at /app
-COPY requirements.txt /app
-COPY tests /app
-COPY main.py /app
-
+COPY requirements.txt /main
+RUN mkdir /main/tests
+COPY tests /main/tests
+COPY test.py /main
+RUN mkdir /main/app
+COPY app/ /main/app
 
 # Install any needed packages specified in requirements.txt
 RUN pip3 install -r requirements.txt
@@ -17,5 +19,5 @@ RUN pip3 install -r requirements.txt
 ENV NAME snowcrush
 
 # Run app.py when the container launches
-CMD ["python3.7", "main.py"]
+CMD ["python3.7", "test.py"]
 
