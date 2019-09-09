@@ -2,10 +2,8 @@
 Log analyzer and adviser.
 
 # Docker Initialization
-`docker build . --tag=snowcrush` <br>
-`docker image ls` <br>
-`docker run -d snowcrush` <br>
-`docker container ls` <br>
+Install `docker-compose`<br>
+Using `docker-compose up`
 
 #Run without docker
 ##Install requirement's
