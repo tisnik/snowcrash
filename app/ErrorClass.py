@@ -2,75 +2,75 @@
 Errors, Python_error, Java_error, Node_JS_error, C_error, C_sharp_error, C_plus_plus_error
 """
 
+
 class Error:
     """This is the class for sorting each type of errors\n
     Line is a pozition of error"""
-    def __init__(self,log):
-        self.line=None
+
+    def __init__(self, log):
+        self.line = None
         self.error_type = None
         self.error_msg = None
         self.path = None
-        self.log=log
+        self.log = log
 
     def __str__(self):
-        output = ""#Error Log: \n"
-        #output+="".join(list(map(lambda x: x+"\n", self.log)))
-        output+="----------\n"
-        output+="Error Type: "+str(self.error_type)
-        output+="\nError massage: "+str(self.error_msg)
-        output+="\nError File: "+str(self.path)
-        output+="\nError Line: "+str(self.line)
-        output+="\n----------"
+        output = ""  # Error Log: \n"
+        # output+="".join(list(map(lambda x: x+"\n", self.log)))
+        output += "----------\n"
+        output += "Error Type: " + str(self.error_type)
+        output += "\nError massage: " + str(self.error_msg)
+        output += "\nError File: " + str(self.path)
+        output += "\nError Line: " + str(self.line)
+        output += "\n----------"
         return output
-
 
 
 class Python_error(Error):
     """This is the class for sorting Python errors\n
     Line is a pozition of error"""
-    def __init__(self,log):
+
+    def __init__(self, log):
         super().__init__(log)
         self.remake_log()
 
-
     def remake_log(self):
-        self.add_error_type_and_msg(self.log[len(self.log)-1])
+        self.add_error_type_and_msg(self.log[len(self.log) - 1])
         self.control_line()
         self.add_fill_path()
-        #print(super())
+        # print(super())
 
-    def add_error_type_and_msg(self,last):
+    def add_error_type_and_msg(self, last):
         if ":" in last:
-            self.error_type=last.split(":")[0]
-            self.error_msg=last.split(":")[1][1::]
+            self.error_type = last.split(":")[0]
+            self.error_msg = last.split(":")[1][1::]
         else:
-            self.error_type=last
-            self.error_msg=None
+            self.error_type = last
+            self.error_msg = None
 
     def control_line(self):
-        for row in self.log:
-            if "File \"" in row and ", line " in row:
-                line=row.split(",")[-2]
-                line=line[1::].split(" ")[-1]
-        self.line=int(line)
-
+        first = self.log[1]
+        line = first.split("\"")[-1][7::]
+        if "," in line:
+            line = line.split(",")[0]
+        self.line = int(line)
 
     def add_fill_path(self):
-        self.path=""
+        self.path = ""
         for row in self.log:
             if "File \"" in row and ", line " in row:
-                path=row.split("\"")[1:len(row.split("\""))-1]
-                fill_path=""
+                path = row.split("\"")[1:len(row.split("\"")) - 1]
+                fill_path = ""
                 for i in path:
-                    fill_path+=i
-        self.path=fill_path
-                    
-                
+                    fill_path += i
+        self.path = fill_path
+
 
 class Java_error(Error):
     """This is the class for sorting Java errors\n
     Line is a pozition of error"""
-    def __init__(self,log):
+
+    def __init__(self, log):
         super().__init__(log)
         self.remake_log()
 
@@ -87,30 +87,36 @@ class Java_error(Error):
             last = last.split("(")[1].split(":")
             self.path = last[0]
             self.line = int(last[1].replace(")", ""))
-        #print(super())
+        # print(super())
+
 
 class C_error(Error):
     """This is the class for sorting C errors\n
     Line is a pozition of error"""
-    def __init__(self,log,line):
+
+    def __init__(self, log, line):
         super().__init__(log, line)
+
 
 class C_sharp_error(Error):
     """This is the class for sorting C# errors\n
     Line is a pozition of error"""
-    def __init__(self,log,line):
+
+    def __init__(self, log, line):
         super().__init__(log, line)
 
 
 class C_plus_plus_error(Error):
     """This is the class for sorting C++ errors\n
     Line is a pozition of error"""
-    def __init__(self,log,line):
+
+    def __init__(self, log, line):
         super().__init__(log, line)
 
 
 class Node_JS_error(Error):
     """This is the class for sorting JavaScript errors\n
     Line is a pozition of error"""
-    def __init__(self,log,line):
+
+    def __init__(self, log, line):
         super().__init__(log, line)

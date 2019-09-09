@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from re import match
-from constants import *
+from app.constants import *
 
 
 def identify(log):
