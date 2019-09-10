@@ -7,16 +7,17 @@ import os
 
 sql_database = Sql_database()
 
-errors=[]
+errors = []
 for root, dirs, files in os.walk("./tests/logs/python"):
     for filename in files:
-        errors.append(open("./tests/logs/python/"+filename))
+        errors.append(open("./tests/logs/python/" + filename))
 for root, dirs, files in os.walk("./tests/logs/java"):
     for filename in files:
-        errors.append(open("./tests/logs/java/"+filename))
+        errors.append(open("./tests/logs/java/" + filename))
 for i in range(len(errors)):
-    errors[i]=bug_search.get_error_from_log(errors[i].read())
+    errors[i] = bug_search.get_error_from_log(errors[i].read())
 for i in range(len(errors)):
     errors[i] = language_identity.identify(errors[i])
     sql_database.add_Error(errors[i])
     print(errors[i])
+print(sql_database.get_table("Errors", "ErrorID", "TypeID", "Path", "Line", "MSG", "First", "Last", "Count"))
