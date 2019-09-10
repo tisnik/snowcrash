@@ -18,6 +18,5 @@ for i in range(len(errors)):
     errors[i]=bug_search.get_error_from_log(errors[i].read())
 for i in range(len(errors)):
     errors[i] = language_identity.identify(errors[i])
-
-    sql_database.add_to_table("Errors", [type(errors[i]).__name__, errors[i].error_type, errors[i].path, errors[i].line, errors[i].error_msg])
+    sql_database.add_Error(errors[i])
     print(errors[i])

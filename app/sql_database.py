@@ -2,16 +2,21 @@ from sqlite3 import *
 import os
 import sys
 from app import constants
+from app import ErrorClass
 
 
 class Sql_database:
 
     def __init__(self, db_path="memory.db"):
         self.conn = None
+        self.key = None
         self.db_path = db_path
         self.init_db()
 
     def init_db(self):
+        """
+        Init's database
+        """
         if os.path.isfile(self.db_path):
             try:
                 open(self.db_path, "a")
@@ -33,10 +38,22 @@ class Sql_database:
     def execute(self, sql):
         self.conn.execute(sql)
 
-    def query(self, sql):
-        return self.conn.query(sql)
+    def add_Error(self, error: ErrorClass.Error) -> bool:
+        """
+        This method takes Error class and inserting it to the database
+        :param error: is instance Error class  
+        :return: True or False 
+        """
+        lang = type(error).__name__
+        if not (lang in self.get_table("Language", "Language")):
+            for regex, language in constants.patterns:
+                if type(language).__name__ == lang:
+                    self.add_to_table("Language", [lang, regex])
 
-    def add_to_table(self,table,variables=[]):
+        return self.add_to_table("Error", [lang, error.error_type, error.path, error.line,
+                                           error.error_msg, False, False])
+
+    def add_to_table(self, table, variables=[]) -> bool:
         """
 table is name of table to write. It can take values (Errors, Type, Language, Solution)
     
