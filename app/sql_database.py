@@ -35,6 +35,16 @@ class Sql_database:
         except Error:
             print("Database already exists")
 
+    def get_table(self, name, *columns):
+        if len(columns) > 1:
+            columns = ", ".join(columns)
+        else:
+            columns = columns[0]
+        sql = "SELECT {} FROM {};".format(columns, name)
+        self.key.execute(sql)
+        return self.key.fetchall()
+
+
     def execute(self, sql):
         self.conn.execute(sql)
 
