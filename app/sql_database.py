@@ -68,6 +68,10 @@ class Sql_database:
         self.key.execute(sql)
         return self.key.fetchall()
 
+    def remove_row_via_ID(self, table, id):
+        ids = {'Errors': "ErrorID", 'Type': "TypeID", 'Language': "Language", 'Solution': "SolutionID"}
+        self.key.execute("DELETE FROM " + str(table) + " WHERE " + str(ids[table]) + "=" + str(id))
+
     def add_Error(self, error: ErrorClass.Error) -> bool:
         """
         This method takes Error class and inserting it to the database
