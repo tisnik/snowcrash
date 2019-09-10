@@ -45,8 +45,9 @@ class Sql_database:
         return self.key.fetchall()
 
 
-    def execute(self, sql):
-        self.conn.execute(sql)
+    def execute(self, sql) -> list:
+        self.key.execute(sql)
+        return self.key.fetchall()
 
     def add_Error(self, error: ErrorClass.Error) -> bool:
         """
