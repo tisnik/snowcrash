@@ -44,6 +44,25 @@ class Sql_database:
         self.key.execute(sql)
         return self.key.fetchall()
 
+    def edit_row_table(self, table: str, values: dict, primary_key, pk_value) -> bool:
+        """
+        Updates values in table
+        :param pk_value: Primary key value to match in the table
+        :param primary_key: Primary key of the table
+        :param table: Name of the table
+        :param values: Dictionary of the values to change
+        :return: True or False
+        """
+        vals = ""
+        for key, value in values.items():
+            vals += key + " = " + value + ", "
+        values = vals
+        query = "UPDATE {} SET {} WHERE {}={};".format(table, values, primary_key, pk_value)
+        try:
+            self.key.execute(query)
+            return True
+        except Error:
+            return False
 
     def execute(self, sql) -> list:
         self.key.execute(sql)
@@ -57,7 +76,7 @@ class Sql_database:
         """
         lang = type(error).__name__
         if not (lang in self.get_table("Language", "Language")):
-            for regex, language in constants.patterns:
+            for regex, language in constants.patterns.items():
                 if type(language).__name__ == lang:
                     self.add_to_table("Language", [lang, regex])
 
