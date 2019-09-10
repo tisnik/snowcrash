@@ -93,64 +93,88 @@ Table Solution has:
     Priority - It's a Priority to use Soulution, it's 1(First Use) to 999(Last Use) (INT NOT NULL)      
     Solution - It's a Solution of error (VARCHAR NOT NULL)
         """
-        tables={'Errors':['SELECT TypeID FROM Type WHERE Type=='+str(variables[1])+' AND Language =='+str(variables[0]),
-                         'INSERT INTO Errors'],
-                'Type':['INSERT INTO Type'],
-                'Language':['INSERT INTO Language'],
-                'Solution':['SELECT TypeID FROM Type WHERE Type=='+str(variables[1])+' AND Language =='+str(variables[0]),
-                            'INSERT INTO Solution']}
+        tables={'Errors':['SELECT TypeID FROM Type WHERE TypeName=\"'+str(variables[1])+'\" AND Language=\"'+str(variables[0])+'\"',
+                         'INSERT INTO Errors('],
+                'Type':['INSERT INTO Type('],
+                'Language':['INSERT INTO Language('],
+                'Solution':['SELECT TypeID FROM Type WHERE TypeName=\"'+str(variables[1])+'\" AND Language=\"'+str(variables[0])+'\"',
+                            'INSERT INTO Solution(']}
         values={'Errors':["Path", "Line", "MSG", "First", "Last", "TypeID"],
                 'Type':["Language", "TypeName", "MSG"],
                 'Language':["Language", "Regex"],
                 'Solution':["Priority", "Soulution", "TypeID"]}
         if table in ['Errors','Type','Language','Solution']:
             for query in tables[str(table)]:
-                if query[0:5]=="SELECT":
+                if query[0:6]=="SELECT":
                     try:
                         self.key.execute(query)
-                        variables.append(self.key.fetchall()[0])
+                        id=self.key.fetchall()[0]
+                        variables.append(id[1:-2])
                     except:
-                        if variables[0] not in self.key.fetchall():
-                            self.add_to_table("Language",[variables[0],input("add regex to language "+str(variables[0]))+":"])
-                        self.add_to_table("Type",[variables[0],variables[1],False])
                         self.key.execute("SELECT Language FROM Language")
+                        if variables[0] not in self.key.fetchall():
+                            regex=input("add regex to language "+str(variables[0]+":"))
+                            regex2=""
+                            for i in regex:
+                                if i == "\"":
+                                    regex2+="\"\""
+                                else:
+                                    regex2+=i
+                            self.add_to_table("Language",[variables[0],regex2])
+                        self.add_to_table("Type",[variables[0],variables[1],False])
                         self.key.execute(query)
-                        variables.append(self.key.fetchall()[0])
-                elif query[0:5]=="INSERT" and table in ["Errors","Solution"]:
+                        id=self.key.fetchall()[0]
+                        variables.append(id[1:-2])
+                elif query[0:6]=="INSERT" and table in ["Errors","Solution"]:
                     for i in range(len(values[table])):
                         if variables[i+2]!=False:
                             query+=values[table][i]+","
                     if table=="Errors":
-                        query+="ErrorID,COUNT) VALUES("
+                        query+="ErrorID,COUNT) VALUES(\""
                     else:
-                        query+="SolutionID,COUNT) VALUES("
+                        query+="SolutionID,COUNT) VALUES(\""
                     for i in range(len(values[table])):
                         if variables[i+2]!=False:
-                            query+=str(variables[i+2])+","
+                            query+=str(variables[i+2])+"\",\""
                     if table=="Errors":
-                        query+=str(int(self.key.execute("SELECT max(ErrorID)FROM Errors").fetchall()[0])+1)+",0)"
+                        id=self.key.execute("SELECT max(ErrorID) FROM Errors").fetchall()[0]
+                        if id is not int:
+                            query=query[:-1]+"0"
+                        else:
+                            query=query[:-1]+str(int(id)+1)
+                        query+=",0)"
                     else:
-                        query+=str(int(self.key.execute("SELECT max(SolutionID)FROM Solution").fetchall()[0])+1)+",0)"
+                        id=self.key.execute("SELECT max(SoulutionID) FROM Solution").fetchall()[0]
+                        if id is not int:
+                            query=query[:-1]+"0"
+                        else:
+                            query=query[:-1]+str(int(id)+1)
+                        query+=",0)"
                     try:
                         self.conn.execute(query)
                         return True
                     except:
                         return False
-                elif query[0:5]=="INSERT" and table in ['Type','Language']:
+                elif query[0:6]=="INSERT" and table in ['Type','Language']:
                     for i in range(len(values[table])):
                         if variables[i]!=False:
                             query+=values[table][i]+","
                     if table=="Type":
-                        query+="TypeID,COUNT) VALUES("
+                        query+="TypeID,COUNT) VALUES(\""
                     else:
-                        query+="COUNT) VALUES("
+                        query+="COUNT) VALUES(\""
                     for i in range(len(values[table])):
                         if variables[i]!=False:
-                            query+=str(variables[i])+","
+                            query+=str(variables[i])+"\",\""
                     if table=="Type":
-                        query+=str(int(self.key.execute("SELECT max(TypeID)FROM Type").fetchall()[0])+1)+",0)"
+                        id=self.key.execute("SELECT max(TypeID) FROM Type").fetchall()[0]
+                        if id is not int:
+                            query=query[:-1]+"0"
+                        else:
+                            query=query[:-1]+str(int(id)+1)
+                        query+=",0)"
                     else:
-                        query+="0)"
+                        query=query[:-1]+"0)"
                     try:
                         self.conn.execute(query)
                         return True
@@ -158,3 +182,6 @@ Table Solution has:
                         return False
         else:
             return False
+        return False
+some=Sql_database()
+some.add_to_table("Errors",["Python","TypeError","some.py",5,False,False,False])
