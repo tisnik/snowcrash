@@ -36,7 +36,7 @@ class Sql_database:
     def query(self, sql):
         return self.conn.query(sql)
 
-    def add_to_table(table,variables=[]):
+    def add_to_table(self,table,variables=[]):
         """
 table is name of table to write. It can take values (Error, Type, Language, Solution)
     
@@ -73,10 +73,10 @@ Table Solution has:
                 'Solution':['SELECT TypeID FROM Type WHERE Type=='+str(variables[1])+' and Language =='+str(variables[0]),
                             'INSERT INTO Solution']}
         if table in ['Error','Type','Language','Solution']:
-        for query in tables[str(table)]:
-            if query[0:5]=="SELECT":
-                key.execute(query)
-                get=key.fetchall()
-                print(get)
-    else:
-        return "This table isn't Exist"
+            for query in tables[str(table)]:
+                if query[0:5]=="SELECT":
+                    self.key.execute(query)
+                    get=self.key.fetchall()
+                    print(get)
+        else:
+            return "This table isn't Exist"
