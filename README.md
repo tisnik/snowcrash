@@ -11,7 +11,6 @@ Using `docker-compose up`
 ## Run it
  Using `python main.py --help` 
 ### Command line options:
-`python main.py  --filename PATH          Filename of the log to read from`<br>
-`python main.py  --mode [print|lookInDb] print to show Error info, lookInDb to look for data from DB`<br>
-`python main.py  --help                   Show this message and exit.`<br>
-
+`  -f, --filename PATH             Filename of the log to read from` <br>
+`  -m, --mode [process|show_db|print] Select mode` <br>
+`  --help                          Show this message and exit.`<br>
