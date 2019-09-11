@@ -165,127 +165,73 @@ class Sql_database:
         return self.add_to_table("Error",
                                  [lang, error.error_type, error.path, error.line, error.error_msg, False, False])
 
-    def add_to_table(self, table, variables=[]) -> bool:
+    def parse_table(self, template, variables) -> bool:
+        i = 0
+        if len(variables) < len(template):
+            variables = variables +\
+                [None for _ in range(len(template) - len(variables))]
+        for attribute in template:
+            template[attribute] = str(variables[i])
+            i += 1
+        return template
+        
+    def add_to_table(self, table, variables) -> bool:
         """
-table is name of table to write. It can take values (Errors, Type, Language, Solution)
-    
-variables is list of variables to tables. It can take values listed below. Variables must be defined, even those that are optional. If you don't want to set a variable, enter it as False.
-    
-Table Errors has: 
-    Language - It's a File Language (VARCHAR NOT NULL)
-    Type - It's a Error type's name (VARCHAR NOT NULL)
-    Path - It's a Fill Path of error (VARCHAR NULL) 
-    Line - It's a Line of error (INT NULL)
-    MSG - It's a Message of error (VARCHAR NULL)
-    First - It's a First time of error record (YYYY-MM-DD HH-MM-SS NULL) 
-    Last - It's a Last time of error record (YYYY-MM-DD HH-MM-SS NULL) 
-    
-Table Type has:
-    Language - It's a Error Language (VARCHAR NOT NULL)
-    TypeName - It's a Error type (VARCHAR NOT NULL)
-    MSG - It's a Moustly use message (VARCHAR) NULL
-    
-Table Language has:
-    Language - It's a Name of programing language (VARCHAR NOT NULL)
-    Regex - It's a string to recognition File (VARCHAR NOT NULL)
-    
-Table Solution has: 
-    Language - It's a File Language (VARCHAR NOT NULL)
-    Type - It's a Error type's name (VARCHAR NOT NULL)
-    Priority - It's a Priority to use Soulution, it's 1(First Use) to 999(Last Use) (INT NOT NULL)      
-    Solution - It's a Solution of error (VARCHAR NOT NULL)
+        the table is the name of the table to write.
+        It can take values (Errors, Type, Language, Solution)
+        variables are a list of variables to tables.
+        It can take the values listed below.
+        Variables must be defined, even those that are optional.
+        If you don't want to set a variable, enter it as False.
         """
-        tables = {'Errors': [
-            'SELECT TypeID FROM Type WHERE TypeName=\"' + str(variables[1]) + '\" AND Language=\"' + str(
-                variables[0]) + '\"',
-            'INSERT INTO Errors('],
-            'Type': ['INSERT INTO Type('],
-            'Language': ['INSERT INTO Language('],
-            'Solution': [
-                'SELECT TypeID FROM Type WHERE TypeName=\"' + str(variables[1]) + '\" AND Language=\"' + str(
-                    variables[0]) + '\"',
-                'INSERT INTO Solution(']}
-        values = {'Errors': ["Path", "Line", "MSG", "First", "Last", "TypeID"],
-                  'Type': ["Language", "TypeName", "MSG"],
-                  'Language': ["Language", "Regex"],
-                  'Solution': ["Priority", "Soulution", "TypeID"]}
+        select = "SELECT {} FROM {} WHERE {} = \'{}\' AND {} = \'{}\';"
+        insert = "INSERT INTO {}({}) VALUES(\'{}\');"
+        values = {'Errors': {"Path": None, "Line": None, "MSG": None,
+                            "First": None, "Last": None, "TypeID": None},
+                'Type': {"Language": None, "TypeName": None, "MSG": None},
+                'Language': {"Language": None, "Regex": None},
+                'Solution': {"Solution": None, "Priority": None, "TypeID": None}}
+
         if table in values:
-            for query in tables[str(table)]:
-                if query[0:6] == "SELECT":
-                    try:
-                        self.key.execute(query)
-                        id = self.key.fetchall()[0]
-                        variables.append(id[1:-2])
-                    except:
-                        self.key.execute("SELECT Language FROM Language")
-                        if variables[0] not in self.key.fetchall():
-                            regex = input("add regex to language " + str(variables[0] + ":"))
-                            regex2 = ""
-                            for i in regex:
-                                if i == "\"":
-                                    regex2 += "\"\""
-                                else:
-                                    regex2 += i
-                            self.add_to_table("Language", [variables[0], regex2])
-                        self.add_to_table("Type", [variables[0], variables[1], False])
-                        self.key.execute(query)
-                        id = self.key.fetchall()[0]
-                        variables.append(id[1:-2])
-                elif query[0:6] == "INSERT" and table in ["Errors", "Solution"]:
-                    for i in range(len(values[table])):
-                        if variables[i + 2] != False:
-                            query += values[table][i] + ","
-                    if table == "Errors":
-                        query += "ErrorID,COUNT) VALUES(\""
-                    else:
-                        query += "SolutionID,COUNT) VALUES(\""
-                    for i in range(len(values[table])):
-                        if variables[i + 2] != False:
-                            query += str(variables[i + 2]) + "\",\""
-                    if table == "Errors":
-                        id = self.key.execute("SELECT max(ErrorID) FROM Errors").fetchall()[0]
-                        if id is not int:
-                            query = query[:-1] + "0"
-                        else:
-                            query = query[:-1] + str(int(id) + 1)
-                        query += ",0)"
-                    else:
-                        id = self.key.execute("SELECT max(SoulutionID) FROM Solution").fetchall()[0]
-                        if id is not int:
-                            query = query[:-1] + "0"
-                        else:
-                            query = query[:-1] + str(int(id) + 1)
-                        query += ",0)"
-                    try:
-                        self.conn.execute(query)
-                        return True
-                    except:
+            for template in values:
+                if template in ["Errors", "Solution"] and template == table:
+                    sql = select.format("TypeID", "Type",
+                                        "Language", variables[0][0],
+                                        "TypeName", variables[0][1])
+
+                    variables = variables[1]
+                    self.key.execute(sql)
+
+                if table == "Type":
+                    condition = "Language"
+                    value = self.parse_table(values[condition], variables)
+                    sql = select.format(condition, condition, condition,
+                                        value[condition], "\'1\'", 1)
+
+                    self.key.execute(sql)
+                    response = len(self.key.fetchall())
+                    if response == 0:
+                        print("Not {} for curren {}".format(condition, table))
                         return False
-                elif query[0:6] == "INSERT" and table in ['Type', 'Language']:
-                    for i in range(len(values[table])):
-                        if variables[i] != False:
-                            query += values[table][i] + ","
-                    if table == "Type":
-                        query += "TypeID,COUNT) VALUES(\""
+
+                if template == table:
+                    value = self.parse_table(values[table], variables)
+                    if table == "Solution":
+                        value["Solved"] = "0"
+                        value["Unsolved"] = "0"
                     else:
-                        query += "COUNT) VALUES(\""
-                    for i in range(len(values[table])):
-                        if variables[i] != False:
-                            query += str(variables[i]) + "\",\""
-                    if table == "Type":
-                        id = self.key.execute("SELECT max(TypeID) FROM Type").fetchall()[0]
-                        if id is not int:
-                            query = query[:-1] + "0"
-                        else:
-                            query = query[:-1] + str(int(id) + 1)
-                        query += ",0)"
-                    else:
-                        query = query[:-1] + "0)"
+                        value["COUNT"] = "0"
+                    if table in ["Errors", "Solution"]:
+                        response = self.key.fetchall()[0][0]
+                        value["TypeID"] = str(response)
+
+                    sql = insert.format(table, ", " .join(value),
+                                        "\', \'".join(value.values()))
                     try:
-                        self.conn.execute(query)
-                        return True
-                    except:
-                        return False
-        else:
-            return False
-        return False
+                        self.key.execute(sql)
+                    except IntegrityError:
+                        print("Language {} already in database"
+                            .format(value[table]))
+
+                    print(sql)
+                    return True

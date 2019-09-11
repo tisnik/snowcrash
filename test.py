@@ -16,11 +16,12 @@ for root, dirs, files in os.walk("./tests/logs/java"):
         errors.append(open("./tests/logs/java/" + filename))
 for i in range(len(errors)):
     errors[i] = bug_search.get_error_from_log(errors[i].read())
-#for i in range(len(errors)):
-    #errors[i] = language_identity.identify(errors[i])
-    #sql_database.add_Error(errors[i])
-    #print(errors[i])
+for i in range(len(errors)):
+    errors[i] = language_identity.identify(errors[i])
+    sql_database.add_Error(errors[i])
+    print(errors[i])
 
+"""
 # Working
 test = Sql_database()  # Create Test connect to database memory.db
 print(test.get_table("Language", "Language, COUNT"))  # SELECT Language, COUNT FROM Language
@@ -34,8 +35,15 @@ try:
 except Exception as error:
     print("Error: " + str(error) + "the part \"Not Working#1\" must work first")
 # Not Working
-print(test.add_Error(language_identity.identify(bug_search.get_error_from_log("""Traceback (most recent call last):
-  File \"tests/Python_Errors/IndexError.py\", line 2, in <module>
-    print(list[4]) #list index out of range
-IndexError: list index out of range
-"""))))  # (Not Working#1)
+"""
+#print(test.add_Error(language_identity.identify(bug_search.get_error_from_log("""Traceback (most recent call last):
+#  File \"tests/Python_Errors/IndexError.py\", line 2, in <module>
+#    print(list[4]) #list index out of range
+#IndexError: list index out of range
+#"""))))  # (Not Working#1)
+
+print(sql_database.add_to_table("Errors", [["Python","KeyError"],["some.py", 5, "Some Message", False, False]]))
+print(sql_database.add_to_table("Solution",[["Python", "KeyError"], ["Solution is C+A DELETE", 0]]))
+print(sql_database.add_to_table("Type",["Python","KeyError", "Wrong Key"]))
+print(sql_database.add_to_table("Language",["Java", r"\tat [a-zA-Z.\/]+\([A-Za-z:.-_0-9 ]+\)"]))
+
