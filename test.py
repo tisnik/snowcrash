@@ -27,6 +27,7 @@ print(test.get_table("Language", "Language, COUNT"))  # SELECT Language, COUNT F
 test.edit_row_table("Type", {"COUNT": 1, "MSG": "NULL"}, "TypeID", 0)  # UPDATE type SET COUNT='2', MSG="NULL" WHERE TypeID="0" (need have in table some Type Error where ID is 0)
 test.edit_row_table("Language", {"COUNT": 1}, "Language", "Python")
 print(test.get_rows_ID("Type", "COUNT", 0, 3))  # SELECT TypeID FROM Tpe WHERE COUNT BETWEEN '0' AND '3'
+print(test.get_TypeID("TypeError","Python"))
 try:
     test.remove_row_via_ID("Errors", "ErrorID",
                            test.get_rows_ID("Errors", "First", "NULL"))  # the part below must work first

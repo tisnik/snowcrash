@@ -89,10 +89,10 @@ class Sql_database:
         :return: True or False
         """
         if len(self.execute(
-                "SELECT TypeName, MSG FROM Type WHERE TypeName={} AND MSG={}".format(type_name, str(msg)))) == 0:
+                "SELECT TypeName, MSG FROM Type WHERE TypeName=\'{}\' AND MSG=\'{}\'".format(type_name, str(msg)))) == 0:
             return self.add_to_table("Type", [language, type_name, msg])
         else:
-            return self.edit_row_table("Type", {"COUNT": "COUNT +1"})
+            return self.execute("UPDATE Type SET COUNT=COUNT + 1 WHERE TypeName=\'{}\' AND MSG=\'{}\' AND Language=\'{}\'".format(str(type_name), str(msg), str(language)))
 
     def remove_row_via_ID(self, table, table_pk, table_pk_value):
         self.key.execute("DELETE FROM " + str(table) + " WHERE " + str(table_pk) + "=" + str(table_pk_value))
@@ -109,6 +109,15 @@ class Sql_database:
             return self.get_table(
                 table + " WHERE " + table_var + " BETWEEN \'" + str(table_value_min) + "\' AND \'" + str(
                     table_value_max) + "\'", ids[table])
+
+    def get_TypeID(self, TypeName, Language):
+        list1=self.get_table("Type WHERE TypeName=\'"+str(TypeName)+"\'","TypeID")
+        list2=self.get_table("Type WHERE Language=\'"+str(Language)+"\'","TypeID")
+        for id1 in list1:
+            for id2 in list2:
+                if id1[0]==id2[0]:
+                    return id1[0]
+        return False
 
     def add_Error(self, error: ErrorClass.Error) -> bool:
         """
