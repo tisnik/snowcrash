@@ -97,9 +97,11 @@ class Sql_database:
     def remove_row_via_ID(self, table, table_pk, table_pk_value):
         self.key.execute("DELETE FROM " + str(table) + " WHERE " + str(table_pk) + "=" + str(table_pk_value))
 
-    def to_errors(self):
+    def get_errors(self) -> [tuple]:
         """Getting all errors from the Database - WIP"""
-        return self.get_table("Errors", "*")
+        return self.execute(
+            "SELECT Path, Line, Errors.MSG, First, Last, Errors.COUNT, Type.Language, Type.TypeName FROM Errors LEFT "
+            "JOIN Type ON Errors.TypeID=Type.TypeID")
 
     def get_rows_ID(self, table, table_var, table_value_min, table_value_max=False):
         ids = {'Errors': "ErrorID", 'Type': "TypeID", 'Language': "Language", 'Solution': "SolutionID"}
@@ -127,16 +129,16 @@ class Sql_database:
         """
         types = self.get_table("Type", "*")
         lang = (type(error).__name__).replace("_error", "")
-        if types!=[]:
+        if types != []:
             for row in types:
-                if row[2]==error.error_type and row[1]==lang:
-                    language = self.get_table("Language WHERE Language=\'"+row[1]+"\'","COUNT")
-                    self.edit_row_table("Type",{"COUNT":int(row[4]+1)},"TypeID",row[0])
-                    self.edit_row_table("Language",{"COUNT":language[0][0]+1},"Language",row[1])
-                    errors_control=self.get_table("Errors","MSG, Path, Line, COUNT, ErrorID") 
+                if row[2] == error.error_type and row[1] == lang:
+                    language = self.get_table("Language WHERE Language=\'" + row[1] + "\'", "COUNT")
+                    self.edit_row_table("Type", {"COUNT": int(row[4] + 1)}, "TypeID", row[0])
+                    self.edit_row_table("Language", {"COUNT": language[0][0] + 1}, "Language", row[1])
+                    errors_control = self.get_table("Errors", "MSG, Path, Line, COUNT, ErrorID")
                     for row in errors_control:
                         if row[0] == error.error_msg and row[1] == error.path and row[2] == error.line:
-                            self.edit_row_table("Error",{"COUNT":int(row[3])+1},"ErrorID",row[4])
+                            self.edit_row_table("Error", {"COUNT": int(row[3]) + 1}, "ErrorID", row[4])
                             return True
 
         if not ((lang,) in self.get_table("Language", "Language")):
@@ -145,9 +147,10 @@ class Sql_database:
                 if (type(language).__name__).replace("_error", "") == lang:
                     self.add_to_table("Language", [lang, regex])
         else:
-            language = self.get_table("Language WHERE Language=\'"+lang+"\'","COUNT")
-            self.edit_row_table("Language",{"COUNT":int(language[0][0])+1},"Language",lang)
-        return self.add_to_table("Error", [lang, error.error_type, error.path, error.line, error.error_msg, False, False])
+            language = self.get_table("Language WHERE Language=\'" + lang + "\'", "COUNT")
+            self.edit_row_table("Language", {"COUNT": int(language[0][0]) + 1}, "Language", lang)
+        return self.add_to_table("Error",
+                                 [lang, error.error_type, error.path, error.line, error.error_msg, False, False])
 
     def add_to_table(self, table, variables=[]) -> bool:
         """
