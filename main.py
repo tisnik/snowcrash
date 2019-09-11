@@ -8,9 +8,18 @@ from app.sql_database import Sql_database
 def show_db():
     """Printout all errors in DB"""
     db = Sql_database()
-    errors = db.to_errors()
+    errors = db.get_errors()
     for error in errors:
-        print(error)
+        print(
+            "Error type: {}, Path: {}, Line: {}, MSG: {}, COUNT: {}, Language: {}, First: {}, Last: {}".format(error[7],
+                                                                                                               error[0],
+                                                                                                               error[1],
+                                                                                                               error[2],
+                                                                                                               error[5],
+                                                                                                               error[6],
+                                                                                                               error[3],
+                                                                                                               error[
+                                                                                                                   4]))
 
 
 def get_processed_log(log):
