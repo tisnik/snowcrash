@@ -55,9 +55,10 @@ class Sql_database:
         """
         vals = ""
         for key, value in values.items():
-            vals += key + " = " + value + ", "
-        values = vals
-        query = "UPDATE {} SET {} WHERE {}={};".format(table, values, primary_key, pk_value)
+            vals += " " + key + " = \'" + str(value) + "\',"
+        values = vals[:-1]
+        query = "UPDATE {} SET{} WHERE {}=\'{}\';".format(table, values, primary_key, str(pk_value))
+        print(query)
         try:
             self.key.execute(query)
             return True
@@ -68,9 +69,15 @@ class Sql_database:
         self.key.execute(sql)
         return self.key.fetchall()
 
-    def remove_row_via_ID(self, table, id):
+    def remove_row_via_ID(self, table, table_pk, table_pk_value):
+        self.key.execute("DELETE FROM " + str(table) + " WHERE " + str(table_pk) + "=" + str(table_pk_value))
+
+    def get_rows_ID(self, table, table_var, table_value_min, table_value_max=False):
         ids = {'Errors': "ErrorID", 'Type': "TypeID", 'Language': "Language", 'Solution': "SolutionID"}
-        self.key.execute("DELETE FROM " + str(table) + " WHERE " + str(ids[table]) + "=" + str(id))
+        if table_value_max in [False, True]:
+            return self.get_table(table+" WHERE "+table_var+"="+str(table_value_min), ids[table])
+        else:    
+            return self.get_table(table+" WHERE "+table_var+" BETWEEN \'"+str(table_value_min)+"\' AND \'"+str(table_value_max)+"\'", ids[table])
 
     def add_Error(self, error: ErrorClass.Error) -> bool:
         """
@@ -84,7 +91,7 @@ class Sql_database:
                 if type(language).__name__ == lang:
                     self.add_to_table("Language", [lang, regex])
 
-        return self.add_to_table("Error", [lang, error.error_type, error.path, error.line,
+        return self.add_to_table("Error", [lang.replace("_error",""), error.error_type, error.path, error.line,
                                            error.error_msg, False, False])
 
     def add_to_table(self, table, variables=[]) -> bool:
@@ -207,5 +214,3 @@ Table Solution has:
         else:
             return False
         return False
-some=Sql_database()
-some.add_to_table("Errors",["Python","TypeError","some.py",5,False,False,False])

@@ -35,7 +35,7 @@ class Python_error(Error):
         self.remake_log()
 
     def remake_log(self):
-        self.add_error_type_and_msg(self.log[len(self.log) - 1])
+        self.add_error_type_and_msg(self.log[-1])
         self.control_line()
         self.add_fill_path()
         # print(super())
