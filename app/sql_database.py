@@ -82,7 +82,7 @@ class Sql_database:
 
     def add_type(self, language: str, type_name: str, msg="NULL"):
         """
-        adding type of error to DB
+        Adding type of error to DB
         :param language: name of existing language
         :param type_name: like (AssertionError)
         :param msg: msg of the type of the error
@@ -96,6 +96,10 @@ class Sql_database:
 
     def remove_row_via_ID(self, table, table_pk, table_pk_value):
         self.key.execute("DELETE FROM " + str(table) + " WHERE " + str(table_pk) + "=" + str(table_pk_value))
+
+    def to_errors(self):
+        """Getting all errors from the Database - WIP"""
+        return self.get_table("Errors", "*")
 
     def get_rows_ID(self, table, table_var, table_value_min, table_value_max=False):
         ids = {'Errors': "ErrorID", 'Type': "TypeID", 'Language': "Language", 'Solution': "SolutionID"}
