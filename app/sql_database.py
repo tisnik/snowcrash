@@ -69,6 +69,32 @@ class Sql_database:
         self.key.execute(sql)
         return self.key.fetchall()
 
+    def add_language(self, language_name: str, regex_for_language=False) -> bool:
+        """
+        Adding language to database
+        :param language_name: Name of the language (language class without _error)
+        :param regex_for_language: Optional argument, only for initial addition
+        :return: True or False
+        """
+        if len(self.execute("SELECT Language FROM Language where Language=" + language_name)) == 0:
+            return self.add_to_table("Language", [language_name, regex_for_language])
+        else:
+            return self.edit_row_table("Language", {"COUNT": "COUNT + 1"}, "Language", language_name)
+
+    def add_type(self, language: str, type_name: str, msg="NULL"):
+        """
+        adding type of error to DB
+        :param language: name of existing language
+        :param type_name: like (AssertionError)
+        :param msg: msg of the type of the error
+        :return: True or False
+        """
+        if len(self.execute(
+                "SELECT TypeName, MSG FROM Type WHERE TypeName={} AND MSG={}".format(type_name, str(msg)))) == 0:
+            return self.add_to_table("Type", [language, type_name, msg])
+        else:
+            return self.edit_row_table("Type", {"COUNT": "COUNT +1"})
+
     def remove_row_via_ID(self, table, table_pk, table_pk_value):
         self.key.execute("DELETE FROM " + str(table) + " WHERE " + str(table_pk) + "=" + str(table_pk_value))
 
@@ -130,12 +156,12 @@ Table Solution has:
             'SELECT TypeID FROM Type WHERE TypeName=\"' + str(variables[1]) + '\" AND Language=\"' + str(
                 variables[0]) + '\"',
             'INSERT INTO Errors('],
-                  'Type': ['INSERT INTO Type('],
-                  'Language': ['INSERT INTO Language('],
-                  'Solution': [
-                      'SELECT TypeID FROM Type WHERE TypeName=\"' + str(variables[1]) + '\" AND Language=\"' + str(
-                          variables[0]) + '\"',
-                      'INSERT INTO Solution(']}
+            'Type': ['INSERT INTO Type('],
+            'Language': ['INSERT INTO Language('],
+            'Solution': [
+                'SELECT TypeID FROM Type WHERE TypeName=\"' + str(variables[1]) + '\" AND Language=\"' + str(
+                    variables[0]) + '\"',
+                'INSERT INTO Solution(']}
         values = {'Errors': ["Path", "Line", "MSG", "First", "Last", "TypeID"],
                   'Type': ["Language", "TypeName", "MSG"],
                   'Language': ["Language", "Regex"],
