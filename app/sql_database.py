@@ -75,9 +75,11 @@ class Sql_database:
     def get_rows_ID(self, table, table_var, table_value_min, table_value_max=False):
         ids = {'Errors': "ErrorID", 'Type': "TypeID", 'Language': "Language", 'Solution': "SolutionID"}
         if table_value_max in [False, True]:
-            return self.get_table(table+" WHERE "+table_var+"="+str(table_value_min), ids[table])
-        else:    
-            return self.get_table(table+" WHERE "+table_var+" BETWEEN \'"+str(table_value_min)+"\' AND \'"+str(table_value_max)+"\'", ids[table])
+            return self.get_table(table + " WHERE " + table_var + "=" + str(table_value_min), ids[table])
+        else:
+            return self.get_table(
+                table + " WHERE " + table_var + " BETWEEN \'" + str(table_value_min) + "\' AND \'" + str(
+                    table_value_max) + "\'", ids[table])
 
     def add_Error(self, error: ErrorClass.Error) -> bool:
         """
@@ -91,7 +93,7 @@ class Sql_database:
                 if type(language).__name__ == lang:
                     self.add_to_table("Language", [lang, regex])
 
-        return self.add_to_table("Error", [lang.replace("_error",""), error.error_type, error.path, error.line,
+        return self.add_to_table("Error", [lang.replace("_error", ""), error.error_type, error.path, error.line,
                                            error.error_msg, False, False])
 
     def add_to_table(self, table, variables=[]) -> bool:
@@ -124,88 +126,92 @@ Table Solution has:
     Priority - It's a Priority to use Soulution, it's 1(First Use) to 999(Last Use) (INT NOT NULL)      
     Solution - It's a Solution of error (VARCHAR NOT NULL)
         """
-        tables={'Errors':['SELECT TypeID FROM Type WHERE TypeName=\"'+str(variables[1])+'\" AND Language=\"'+str(variables[0])+'\"',
-                         'INSERT INTO Errors('],
-                'Type':['INSERT INTO Type('],
-                'Language':['INSERT INTO Language('],
-                'Solution':['SELECT TypeID FROM Type WHERE TypeName=\"'+str(variables[1])+'\" AND Language=\"'+str(variables[0])+'\"',
-                            'INSERT INTO Solution(']}
-        values={'Errors':["Path", "Line", "MSG", "First", "Last", "TypeID"],
-                'Type':["Language", "TypeName", "MSG"],
-                'Language':["Language", "Regex"],
-                'Solution':["Priority", "Soulution", "TypeID"]}
+        tables = {'Errors': [
+            'SELECT TypeID FROM Type WHERE TypeName=\"' + str(variables[1]) + '\" AND Language=\"' + str(
+                variables[0]) + '\"',
+            'INSERT INTO Errors('],
+                  'Type': ['INSERT INTO Type('],
+                  'Language': ['INSERT INTO Language('],
+                  'Solution': [
+                      'SELECT TypeID FROM Type WHERE TypeName=\"' + str(variables[1]) + '\" AND Language=\"' + str(
+                          variables[0]) + '\"',
+                      'INSERT INTO Solution(']}
+        values = {'Errors': ["Path", "Line", "MSG", "First", "Last", "TypeID"],
+                  'Type': ["Language", "TypeName", "MSG"],
+                  'Language': ["Language", "Regex"],
+                  'Solution': ["Priority", "Soulution", "TypeID"]}
         if table in values:
             for query in tables[str(table)]:
-                if query[0:6]=="SELECT":
+                if query[0:6] == "SELECT":
                     try:
                         self.key.execute(query)
-                        id=self.key.fetchall()[0]
+                        id = self.key.fetchall()[0]
                         variables.append(id[1:-2])
                     except:
                         self.key.execute("SELECT Language FROM Language")
                         if variables[0] not in self.key.fetchall():
-                            regex=input("add regex to language "+str(variables[0]+":"))
-                            regex2=""
+                            regex = input("add regex to language " + str(variables[0] + ":"))
+                            regex2 = ""
                             for i in regex:
                                 if i == "\"":
-                                    regex2+="\"\""
+                                    regex2 += "\"\""
                                 else:
-                                    regex2+=i
-                            self.add_to_table("Language",[variables[0],regex2])
-                        self.add_to_table("Type",[variables[0],variables[1],False])
+                                    regex2 += i
+                            self.add_to_table("Language", [variables[0], regex2])
+                        self.add_to_table("Type", [variables[0], variables[1], False])
                         self.key.execute(query)
-                        id=self.key.fetchall()[0]
+                        id = self.key.fetchall()[0]
                         variables.append(id[1:-2])
-                elif query[0:6]=="INSERT" and table in ["Errors","Solution"]:
+                elif query[0:6] == "INSERT" and table in ["Errors", "Solution"]:
                     for i in range(len(values[table])):
-                        if variables[i+2]!=False:
-                            query+=values[table][i]+","
-                    if table=="Errors":
-                        query+="ErrorID,COUNT) VALUES(\""
+                        if variables[i + 2] != False:
+                            query += values[table][i] + ","
+                    if table == "Errors":
+                        query += "ErrorID,COUNT) VALUES(\""
                     else:
-                        query+="SolutionID,COUNT) VALUES(\""
+                        query += "SolutionID,COUNT) VALUES(\""
                     for i in range(len(values[table])):
-                        if variables[i+2]!=False:
-                            query+=str(variables[i+2])+"\",\""
-                    if table=="Errors":
-                        id=self.key.execute("SELECT max(ErrorID) FROM Errors").fetchall()[0]
+                        if variables[i + 2] != False:
+                            query += str(variables[i + 2]) + "\",\""
+                    if table == "Errors":
+                        id = self.key.execute("SELECT max(ErrorID) FROM Errors").fetchall()[0]
                         if id is not int:
-                            query=query[:-1]+"0"
+                            query = query[:-1] + "0"
                         else:
-                            query=query[:-1]+str(int(id)+1)
-                        query+=",0)"
+                            query = query[:-1] + str(int(id) + 1)
+                        query += ",0)"
                     else:
-                        id=self.key.execute("SELECT max(SoulutionID) FROM Solution").fetchall()[0]
+                        id = self.key.execute("SELECT max(SoulutionID) FROM Solution").fetchall()[0]
                         if id is not int:
-                            query=query[:-1]+"0"
+                            query = query[:-1] + "0"
                         else:
-                            query=query[:-1]+str(int(id)+1)
-                        query+=",0)"
+                            query = query[:-1] + str(int(id) + 1)
+                        query += ",0)"
                     try:
                         self.conn.execute(query)
                         return True
                     except:
                         return False
-                elif query[0:6]=="INSERT" and table in ['Type','Language']:
+                elif query[0:6] == "INSERT" and table in ['Type', 'Language']:
                     for i in range(len(values[table])):
-                        if variables[i]!=False:
-                            query+=values[table][i]+","
-                    if table=="Type":
-                        query+="TypeID,COUNT) VALUES(\""
+                        if variables[i] != False:
+                            query += values[table][i] + ","
+                    if table == "Type":
+                        query += "TypeID,COUNT) VALUES(\""
                     else:
-                        query+="COUNT) VALUES(\""
+                        query += "COUNT) VALUES(\""
                     for i in range(len(values[table])):
-                        if variables[i]!=False:
-                            query+=str(variables[i])+"\",\""
-                    if table=="Type":
-                        id=self.key.execute("SELECT max(TypeID) FROM Type").fetchall()[0]
+                        if variables[i] != False:
+                            query += str(variables[i]) + "\",\""
+                    if table == "Type":
+                        id = self.key.execute("SELECT max(TypeID) FROM Type").fetchall()[0]
                         if id is not int:
-                            query=query[:-1]+"0"
+                            query = query[:-1] + "0"
                         else:
-                            query=query[:-1]+str(int(id)+1)
-                        query+=",0)"
+                            query = query[:-1] + str(int(id) + 1)
+                        query += ",0)"
                     else:
-                        query=query[:-1]+"0)"
+                        query = query[:-1] + "0)"
                     try:
                         self.conn.execute(query)
                         return True
