@@ -58,7 +58,6 @@ class Sql_database:
             vals += " " + key + " = \'" + str(value) + "\',"
         values = vals[:-1]
         query = "UPDATE {} SET{} WHERE {}=\'{}\';".format(table, values, primary_key, str(pk_value))
-        print(query)
         try:
             self.key.execute(query)
             return True
@@ -113,14 +112,29 @@ class Sql_database:
         :param error: is instance Error class  
         :return: True or False 
         """
-        lang = type(error).__name__
-        if not (lang in self.get_table("Language", "Language")):
-            for regex, language in constants.patterns.items():
-                if type(language).__name__ == lang:
-                    self.add_to_table("Language", [lang, regex])
+        types = self.get_table("Type", "*")
+        lang = (type(error).__name__).replace("_error", "")
+        if types!=[]:
+            for row in types:
+                if row[2]==error.error_type and row[1]==lang:
+                    language = self.get_table("Language WHERE Language=\'"+row[1]+"\'","COUNT")
+                    self.edit_row_table("Type",{"COUNT":int(row[4]+1)},"TypeID",row[0])
+                    self.edit_row_table("Language",{"COUNT":language[0][0]+1},"Language",row[1])
+                    errors_control=self.get_table("Errors","MSG, Path, Line, COUNT, ErrorID") 
+                    for row in errors_control:
+                        if row[0] == error.error_msg and row[1] == error.path and row[2] == error.line:
+                            self.edit_row_table("Error",{"COUNT":int(row[3])+1},"ErrorID",row[4])
+                            return True
 
-        return self.add_to_table("Error", [lang.replace("_error", ""), error.error_type, error.path, error.line,
-                                           error.error_msg, False, False])
+        if not ((lang,) in self.get_table("Language", "Language")):
+            print("SOME")
+            for regex, language in constants.patterns.items():
+                if (type(language).__name__).replace("_error", "") == lang:
+                    self.add_to_table("Language", [lang, regex])
+        else:
+            language = self.get_table("Language WHERE Language=\'"+lang+"\'","COUNT")
+            self.edit_row_table("Language",{"COUNT":int(language[0][0])+1},"Language",lang)
+        return self.add_to_table("Error", [lang, error.error_type, error.path, error.line, error.error_msg, False, False])
 
     def add_to_table(self, table, variables=[]) -> bool:
         """
