@@ -220,7 +220,7 @@ class Sql_database:
         insert = "INSERT INTO {}({}) VALUES(\'{}\');"
         values = {'Error': {"Path": None, "Line": None, "MSG": None,
                             "First": None, "Last": None, "TypeID": None},
-                'Type': {"LanguageID": None, "TypeName": None, "MSG": None},
+                'Type': {"TypeName": None, "MSG": None, "LanguageID": None},
                 'Language': {"Language": None, "Regex": None, "Version": None},
                 'Solution': {"Solution": None, "Priority": None, "TypeID": None}}
         if table in values.keys():
