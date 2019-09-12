@@ -153,7 +153,7 @@ class Sql_database:
             print(error)
             return False
         
-    def get_ID(self, table: str, value1: list(str), value2: dict(str)):
+    def get_ID(self, table: str, value1: list, value2: list):
         list1 = self.get_table(table+" WHERE "+str(value1[0])+"=\'" + str(value1[1]) + "\'", table + "ID")
         list2 = self.get_table(table+" WHERE "+str(value2[0])+"=\'" + str(value2[1]) + "\'", table + "ID")
         for id1 in list1:
@@ -205,7 +205,7 @@ class Sql_database:
             i += 1
         return template
 
-    def add_to_table(self, table, variables) -> bool:
+    def add_to_table(self, table: str, variables: list, help_variables=False) -> bool:
         """
         the table is the name of the table to write.
         It can take values (Error, Type, Language, Solution)
@@ -214,73 +214,55 @@ class Sql_database:
         Variables must be defined, even those that are optional.
         If you don't want to set a variable, enter it as False.
         """
-        select = "SELECT {} FROM {} WHERE {} = \'{}\' AND {} = \'{}\';"
         insert = "INSERT INTO {}({}) VALUES(\'{}\');"
         values = {'Error': {"Path": None, "Line": None, "MSG": None,
                             "First": None, "Last": None, "TypeID": None},
-                'Type': {"LanguageID": None, "TypeName": None, "MSG": None},
+                'Type': {"TypeName": None, "MSG": None, "LanguageID": None},
                 'Language': {"Language": None, "Regex": None, "Version": None},
                 'Solution': {"Solution": None, "Priority": None, "TypeID": None}}
         if table in values.keys():
-            for template in values:
+            value = self.parse_table(values[table], variables)
+            if table == "Solution":
+                value["Solved"] = "0"
+                value["Unsolved"] = "0"
+            else:
+                value["COUNT"] = "0"
+        trys=0
+        while table in ["Error", "Solution", "Type"] and help_variables != False:
+            lang_id = self.get_ID("Language", ["Language", help_variables[0]], ["Version", help_variables[1]])
+            if lang_id == False:
+                self.add_language(help_variables[0])
+                if trys >= 5:
+                    return False
+                else:
+                    trys+=1
+            else:
                 if table == "Type":
-                    condition = "Language"
-                    value = self.parse_table(values[condition], variables)
-                    sql = select.format(condition, condition, condition,
-                                        value[condition], "\'1\'", 1)
-
-                    self.key.execute(sql)
-                    response = len(self.key.fetchall())
-                    if response == 0:
-                        while True:
-                            language_id = self.get_table("Language", "Language")
-                            languages = []
-                            for list in language_id:
-                                languages.append(list[0])
-                            print(languages)
-                            if language_id == [] or variables[0] not in languages:
-                                self.add_language(variables[0])
-                            else:
-                                break
-
-                if template == table:
-                    if table in ["Language", "Type"]:
-                        value = self.parse_table(values[table], variables)
-                    else:
-                        value = self.parse_table(values[table], variables[1])
-                    if table == "Solution":
-                        value["Solved"] = "0"
-                        value["Unsolved"] = "0"
-                    else:
-                        value["COUNT"] = "0"
-                    if table in ["Error", "Solution"]:
-                        while True:
-                            type_id = self.get_TypeID(variables[0][1], variables[0][0])
-                            if type_id == False:
-                                self.add_type(variables[0][0], variables[0][1])
-                            else:
-                                break
-                        value["TypeID"] = type_id
-
-                    str1 = ["", ""]
-                    for diction in value:
-                        val1 = [str(value[diction]), ""]
-                        for val in val1[0]:
-                            if val == "\'":
-                                val1[1] += "\'"
-                            val1[1] += val
-                        if str1[0] != "":
-                            str1[0] += ", " + str(diction)
-                            str1[1] += "\', \'" + val1[1]
-                        else:
-                            str1[0] += str(diction)
-                            str1[1] += val1[1]
-
-                    sql = insert.format(table, str1[0], str1[1])
-                    try:
-                        self.key.execute(sql)
-                    except IntegrityError:
-                        print("Language {} already in database"
-                              .format(value[table]))
-                    return True
+                    value["LanguageID"] = lang_id
+                break
+        trys=0
+        while table in ["Error", "Solution"] and len(help_variables) == 3:
+            type_id = self.get_ID("Type", ["LanguageID", lang_id], ["TypeName", help_variables[2]])
+            if type_id == False:
+                self.add_type(lang_id, help_variables[2])
+                if trys >= 5:
+                    return False
+                else:
+                    trys+=1
+            else:
+                value["TypeID"] = type_id
+                break
+        keys=""
+        vals="\'"
+        for key in value:
+            keys += key+", "
+        for val in value.values():
+            vals += val+"\', \'"
+        try:
+            sql=insert.format(table, keys[:-2], vals[:-3])
+            print(sql)
+            #self.key.execute(sql)
+            return True
+        except Error as exp:
+            print(exp)
         return False
