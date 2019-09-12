@@ -46,7 +46,7 @@ class Python_error(Error):
             self.error_msg = last.split(":")[1][1::]
         else:
             self.error_type = last
-            self.error_msg = None
+            self.error_msg = "None"
 
     def control_line(self):
         first = self.log[1]
