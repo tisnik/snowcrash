@@ -14,10 +14,10 @@ class Sql_database:
         self.init_db()
 
     def __str__(self):
-        ret_str="Language: "+str(self.get_table("Language","Language, COUNT"))
-        ret_str+="\nType: "+str(self.get_table("Type","TypeName, Language, COUNT"))
-        ret_str+="\nErrors: "+str(self.get_table("Errors","ErrorID, Path, Line, MSG, COUNT"))
-        ret_str+="\nSolution: "+str(self.get_table("Solution","Priority, Solution"))
+        ret_str = "Language: " + str(self.get_table("Language", "Language, Version, COUNT"))
+        ret_str += "\nType: " + str(self.get_table("Type", "TypeName, Language, COUNT"))
+        ret_str += "\nError: " + str(self.get_table("Error", "ErrorID, Path, Line, MSG, COUNT"))
+        ret_str += "\nSolution: " + str(self.get_table("Solution", "Priority, Solution"))
         return ret_str
 
     def init_db(self):
@@ -29,7 +29,7 @@ class Sql_database:
                 open(self.db_path, "a")
             except PermissionError as err:
                 print(err)
-                sys.exit(1) item for innerlist in outerlist for item in innerlist ]
+                sys.exit(1)
 
         self.conn = connect(self.db_path)
         self.conn.isolation_level = None
@@ -75,22 +75,26 @@ class Sql_database:
         self.key.execute(sql)
         return self.key.fetchall()
 
-    def add_language(self, language_name: str, regex_for_language=False) -> bool:
+    def add_language(self, language_name: str, language_version: str = False, regex_for_language=False) -> bool:
         """
         Adding language to database
+        :param language_version: Version of the language
         :param language_name: Name of the language (language class without _error)
         :param regex_for_language: Optional argument, only for initial addition
         :return: True or False
         """
-        if len(self.execute("SELECT Language FROM Language where Language=\'" + language_name+"\'")) == 0:
-            return self.add_to_table("Language", [language_name, regex_for_language])
+        language_ids = self.execute("SELECT LanguageID FROM Language where Language=\'" + language_name + "\' AND "
+                                                                                                          "Version=\'"
+                                    + language_version + "\';")
+        if len(language_ids) == 0:
+            return self.add_to_table("Language", [language_name, language_version, regex_for_language])
         else:
-            return self.count_increase("Language",language_name)
+            return self.count_increase("LanguageID", language_ids[0][0])
 
-    def add_type(self, language: str, type_name: str, msg="NULL"):
+    def add_type(self, language_id: int, type_name: str, msg="NULL"):
         """
         Adding type of error to DB
-        :param language: name of existing language
+        :param language_id: id of existing language
         :param type_name: like (AssertionError)
         :param msg: msg of the type of the error
         :return: True or False
@@ -98,27 +102,27 @@ class Sql_database:
         if len(self.execute(
                 "SELECT TypeName, MSG FROM Type WHERE TypeName=\'{}\' AND MSG=\'{}\'".format(type_name,
                                                                                              str(msg)))) == 0:
-            return self.add_to_table("Type", [language, type_name, msg])
+            return self.add_to_table("Type", [language_id, type_name, msg])
         else:
             return self.execute(
-                "UPDATE Type SET COUNT=COUNT + 1 WHERE TypeName=\'{}\' AND MSG=\'{}\' AND Language=\'{}\'".format(
-                    str(type_name), str(msg), str(language)))
+                "UPDATE Type SET COUNT=COUNT + 1 WHERE TypeName=\'{}\' AND MSG=\'{}\' AND LanguageID=\'{}\'".format(
+                    str(type_name), str(msg), str(language_id)))
 
     def remove_row_via_ID(self, table, table_pk, table_pk_value) -> bool:
         try:
             self.key.execute("DELETE FROM " + str(table) + " WHERE " + str(table_pk) + "=" + str(table_pk_value))
             return True
-        except:
+        except Error:
             return False
 
     def get_errors(self) -> [tuple]:
         """Getting all errors from the Database - WIP"""
         return self.execute(
-            "SELECT Path, Line, Errors.MSG, First, Last, Errors.COUNT, Type.Language, Type.TypeName FROM Errors LEFT "
-            "JOIN Type ON Errors.TypeID=Type.TypeID")
+            "SELECT Path, Line, Error.MSG, First, Last, Error.COUNT, Type.Language, Type.TypeName FROM Error LEFT "
+            "JOIN Type ON Error.TypeID=Type.TypeID")
 
     def get_rows_ID(self, table, table_var, table_value_min, table_value_max=False):
-        ids = {'Errors': "ErrorID", 'Type': "TypeID", 'Language': "Language", 'Solution': "SolutionID"}
+        ids = {'Error': "ErrorID", 'Type': "TypeID", 'Language': "LanguageID", 'Solution': "SolutionID"}
         if table_value_max in [False, True]:
             return self.get_table(table + " WHERE " + table_var + "=" + str(table_value_min), ids[table])
         else:
@@ -126,20 +130,9 @@ class Sql_database:
                 table + " WHERE " + table_var + " BETWEEN \'" + str(table_value_min) + "\' AND \'" + str(
                     table_value_max) + "\'", ids[table])
 
-    def restart_all(self) -> bool:
-        try:
-            self.execute("DELETE FROM Errors")
-            self.execute("DELETE FROM Solution")
-            self.execute("DELETE FROM Type")
-            self.execute("DELETE FROM Language")
-            return True
-        except Exception as error:
-            print(error)
-            return False
-        
-    def add_solution(self, language: str, type_name: int, priority: int, solution: str, solved: bool = False):
+    def add_solution(self, language_id: str, type_name: int, priority: int, solution: str, solved: bool = False):
         if len(self.execute("SELECT * FROM Solution WHERE Solution=" + solution)) == 0:
-            self.add_to_table("Solution", [language, type_name, priority, solution])
+            self.add_to_table("Solution", [language_id, type_name, priority, solution])
         else:
             edit_sql = "UPDATE Solution SET {}={} WHERE Solution={}"
             if solved:
@@ -149,7 +142,7 @@ class Sql_database:
 
     def restart_all(self) -> bool:
         try:
-            self.execute("DELETE FROM Errors")
+            self.execute("DELETE FROM Error")
             self.execute("DELETE FROM Solution")
             self.execute("DELETE FROM Type")
             self.execute("DELETE FROM Language")
@@ -157,19 +150,18 @@ class Sql_database:
         except Exception as error:
             print(error)
             return False
-        
+
     def get_TypeID(self, TypeName, Language):
         list1 = self.get_table("Type WHERE TypeName=\'" + str(TypeName) + "\'", "TypeID")
-        list2 = self.get_table("Type WHERE L item for innerlist in outerlist for item in innerlist ]anguage=\'" + str(Language) + "\'", "TypeID")
+        list2 = self.get_table("Type WHERE Language=\'" + str(Language) + "\'", "TypeID")
         for id1 in list1:
             for id2 in list2:
                 if id1[0] == id2[0]:
                     return id1[0]
         return False
 
-    def count_increase(self, table: str, id):
-        ids = {'Errors': "ErrorID", 'Type': "TypeID", 'Language': "Language", 'Solution': "SolutionID"}
-        self.execute("UPDATE {} SET COUNT=COUNT + 1 WHERE {} = '{}'".format(table, ids[table], str(id)))
+    def count_increase(self, table: str, id: int):
+        self.execute("UPDATE {} SET COUNT=COUNT + 1 WHERE {} = '{}'".format(table, table + "ID", str(id)))
 
     def add_Error(self, error: ErrorClass.Error) -> bool:
         """
@@ -178,43 +170,43 @@ class Sql_database:
         :return: True or False 
         """
         types = self.get_table("Type", "*")
-        lang = (type(error).__name__).replace("_error", "")
-        if types != []:
+        lang = type(error).__name__.replace("_error", "")
+        if types:
             for row in types:
                 if row[2] == error.error_type and row[1] == lang:
-                    language = self.get_table("Language WHERE Language=\'" + row[1] + "\'", "COUNT")
+                    count = self.get_table("Language WHERE Language=\'" + row[1] + "\'", "COUNT")
                     self.count_increase("Type", row[0])
                     self.count_increase("Language", row[1])
-                    errors_control = self.get_table("Errors", "MSG, Path, Line, COUNT, ErrorID")
+                    errors_control = self.get_table("Error", "MSG, Path, Line, COUNT, ErrorID")
                     for row in errors_control:
                         if row[0] == error.error_msg and row[1] == error.path and row[2] == error.line:
-                            self.count_increase("Errors", row[4])
+                            self.count_increase("Error", row[4])
                             return True
 
         if not ((lang,) in self.get_table("Language", "Language")):
             for regex, language in constants.patterns.items():
-                if (type(language).__name__).replace("_error", "") == lang:
-                    self.add_to_table("Language", [lang, regex])
+                if type(language).__name__.replace("_error", "") == lang:
+                    self.add_to_table("Language", [lang, regex, version])
         else:
             language = self.get_table("Language WHERE Language=\'" + lang + "\'", "COUNT")
             self.count_increase("Language", lang)
-        return self.add_to_table("Errors",
+        return self.add_to_table("Error",
                                  [[lang, error.error_type], [error.path, error.line, error.error_msg, False, False]])
 
     def parse_table(self, template, variables) -> bool:
         i = 0
         if len(variables) < len(template):
-            variables = variables +\
-                [None for _ in range(len(template) - len(variables))]
+            variables = variables + \
+                        [None for _ in range(len(template) - len(variables))]
         for attribute in template:
             template[attribute] = str(variables[i])
             i += 1
         return template
-        
+
     def add_to_table(self, table, variables) -> bool:
         """
         the table is the name of the table to write.
-        It can take values (Errors, Type, Language, Solution)
+        It can take values (Error, Type, Language, Solution)
         variables are a list of variables to tables.
         It can take the values listed below.
         Variables must be defined, even those that are optional.
@@ -222,11 +214,11 @@ class Sql_database:
         """
         select = "SELECT {} FROM {} WHERE {} = \'{}\' AND {} = \'{}\';"
         insert = "INSERT INTO {}({}) VALUES(\'{}\');"
-        values = {'Errors': {"Path": None, "Line": None, "MSG": None,
+        values = {'Error': {"Path": None, "Line": None, "MSG": None,
                             "First": None, "Last": None, "TypeID": None},
-                'Type': {"Language": None, "TypeName": None, "MSG": None},
-                'Language': {"Language": None, "Regex": None},
-                'Solution': {"Solution": None, "Priority": None, "TypeID": None}}
+                  'Type': {"Language": None, "TypeName": None, "MSG": None},
+                  'Language': {"Language": None, "Regex": None},
+                  'Solution': {"Solution": None, "Priority": None, "TypeID": None}}
         if table in values.keys():
             for template in values:
                 if table == "Type":
@@ -239,18 +231,18 @@ class Sql_database:
                     response = len(self.key.fetchall())
                     if response == 0:
                         while True:
-                            language_id=self.get_table("Language", "Language")
-                            languages=[]
+                            language_id = self.get_table("Language", "Language")
+                            languages = []
                             for list in language_id:
                                 languages.append(list[0])
                             print(languages)
-                            if language_id==[] or variables[0] not in languages:
+                            if language_id == [] or variables[0] not in languages:
                                 self.add_language(variables[0])
                             else:
                                 break
 
                 if template == table:
-                    if table in ["Language","Type"]:
+                    if table in ["Language", "Type"]:
                         value = self.parse_table(values[table], variables)
                     else:
                         value = self.parse_table(values[table], variables[1])
@@ -259,34 +251,34 @@ class Sql_database:
                         value["Unsolved"] = "0"
                     else:
                         value["COUNT"] = "0"
-                    if table in ["Errors", "Solution"]:
+                    if table in ["Error", "Solution"]:
                         while True:
-                            type_id=self.get_TypeID(variables[0][1], variables[0][0])
-                            if type_id==False:
+                            type_id = self.get_TypeID(variables[0][1], variables[0][0])
+                            if type_id == False:
                                 self.add_type(variables[0][0], variables[0][1])
                             else:
                                 break
                         value["TypeID"] = type_id
-                    
-                    str1=["",""]
+
+                    str1 = ["", ""]
                     for diction in value:
-                        val1=[str(value[diction]),""]
+                        val1 = [str(value[diction]), ""]
                         for val in val1[0]:
-                            if val=="\'":
-                                val1[1]+="\'"
-                            val1[1]+=val
-                        if str1[0]!="":
-                            str1[0]+=", "+str(diction)
-                            str1[1]+="\', \'"+val1[1]
+                            if val == "\'":
+                                val1[1] += "\'"
+                            val1[1] += val
+                        if str1[0] != "":
+                            str1[0] += ", " + str(diction)
+                            str1[1] += "\', \'" + val1[1]
                         else:
-                            str1[0]+=str(diction)
-                            str1[1]+=val1[1]
+                            str1[0] += str(diction)
+                            str1[1] += val1[1]
 
                     sql = insert.format(table, str1[0], str1[1])
                     try:
                         self.key.execute(sql)
                     except IntegrityError:
                         print("Language {} already in database"
-                            .format(value[table]))
+                              .format(value[table]))
                     return True
         return False
