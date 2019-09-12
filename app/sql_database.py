@@ -152,10 +152,10 @@ class Sql_database:
         except Exception as error:
             print(error)
             return False
-
-    def get_TypeID(self, TypeName, Language):
-        list1 = self.get_table("Type WHERE TypeName=\'" + str(TypeName) + "\'", "TypeID")
-        list2 = self.get_table("Type WHERE Language=\'" + str(Language) + "\'", "TypeID")
+        
+    def get_ID(self, table: str, value1: list(str), value2: dict(str)):
+        list1 = self.get_table(table+" WHERE "+str(value1[0])+"=\'" + str(value1[1]) + "\'", table + "ID")
+        list2 = self.get_table(table+" WHERE "+str(value2[0])+"=\'" + str(value2[1]) + "\'", table + "ID")
         for id1 in list1:
             for id2 in list2:
                 if id1[0] == id2[0]:
@@ -218,9 +218,9 @@ class Sql_database:
         insert = "INSERT INTO {}({}) VALUES(\'{}\');"
         values = {'Error': {"Path": None, "Line": None, "MSG": None,
                             "First": None, "Last": None, "TypeID": None},
-                  'Type': {"Language": None, "TypeName": None, "MSG": None},
-                  'Language': {"Language": None, "Regex": None},
-                  'Solution': {"Solution": None, "Priority": None, "TypeID": None}}
+                'Type': {"LanguageID": None, "TypeName": None, "MSG": None},
+                'Language': {"Language": None, "Regex": None, "Version": None},
+                'Solution': {"Solution": None, "Priority": None, "TypeID": None}}
         if table in values.keys():
             for template in values:
                 if table == "Type":
