@@ -75,7 +75,7 @@ class Sql_database:
         self.key.execute(sql)
         return self.key.fetchall()
 
-    def add_language(self, language_name: str, language_version: str = False, regex_for_language=False) -> bool:
+    def add_language(self, language_name: str, language_version = False, regex_for_language = False) -> bool:
         """
         Adding language to database
         :param language_version: Version of the language
@@ -83,9 +83,9 @@ class Sql_database:
         :param regex_for_language: Optional argument, only for initial addition
         :return: True or False
         """
-        language_ids = self.execute("SELECT LanguageID FROM Language where Language=\'" + language_name + "\' AND "
-                                                                                                          "Version=\'"
-                                    + language_version + "\';")
+        language_version = str(language_version)
+        language_ids = self.execute("SELECT LanguageID FROM Language where Language=\'" + str(language_name) + "\' AND "+
+                                    "Version=\'"+ str(language_version) + "\';")
         if len(language_ids) == 0:
             return self.add_to_table("Language", [language_name, regex_for_language, language_version])
         else:
@@ -107,7 +107,7 @@ class Sql_database:
         else:
             return self.execute(
                 "UPDATE Type SET COUNT=COUNT + 1 WHERE TypeName=\'{}\' AND MSG=\'{}\' AND LanguageID ="
-                " (SELECT LanguageID FROM Language WHERE Language={} AND Version={})".format(
+                " (SELECT LanguageID FROM Language WHERE Language=\'{}\' AND Version=\'{}\')".format(
                     str(type_name), str(msg), str(language), str(language_version)))
 
     def remove_row_via_ID(self, table, table_pk, table_pk_value) -> bool:
@@ -171,20 +171,20 @@ class Sql_database:
         :param error: is instance Error class  
         :return: True or False 
         """
-        types = self.get_table("Type", "*")
         lang = type(error).__name__.replace("_error", "")
-        if types:
-            for row in types:
-                if row[2] == error.error_type and row[1] == lang:
-                    count = self.get_table("Language WHERE Language=\'" + row[1] + "\'", "COUNT")
-                    self.count_increase("Type", row[0])
-                    self.count_increase("Language", row[1])
-                    errors_control = self.get_table("Error", "MSG, Path, Line, COUNT, ErrorID")
-                    for row in errors_control:
-                        if row[0] == error.error_msg and row[1] == error.path and row[2] == error.line:
-                            self.count_increase("Error", row[4])
-                            return True
-
+        list_of_error_types=self.execute("SELECT Language.Language, Type.TypeName FROM Language, Type WHERE Type.LanguageID=Language.LanguageID")
+        list_of_langues=self.execute("SELECT Language, Version FROM Language")
+        error_list=self.execute("SELECT TypeID, Path, Line, MSG FROM Error")
+        if (lang, error.error_type) in list_of_error_types:
+            self.count_increase("Language",self.get_ID("Language",["Language",lang],["Version",False]))
+            type_id=self.get_ID("Type",["TypeName",error.error_type],["LanguageID",self.get_ID("Language",["Language",lang],["Version",False])])
+            self.count_increase("Type", type_id)
+            if (type_id, error.path, error.line, error.error_msg) in error_list:
+                self.count_increase("Error",self.get_ID("Error", ["TypeID", type_id], ["Path", error.path]))
+                return True
+        elif (lang, False) in list_of_langues:
+            self.count_increase("Language",self.get_ID("Language",["Language",lang],["Version",False]))
+        
         if not ((lang,) in self.get_table("Language", "Language")):
             for regex, language in constants.patterns.items():
                 if type(language).__name__.replace("_error", "") == lang:
@@ -214,7 +214,7 @@ class Sql_database:
         Variables must be defined, even those that are optional.
         If you don't want to set a variable, enter it as False.
         """
-        insert = "INSERT INTO {}({}) VALUES(\'{}\');"
+        insert = "INSERT INTO {}({}) VALUES({});"
         values = {'Error': {"Path": None, "Line": None, "MSG": None,
                             "First": None, "Last": None, "TypeID": None},
                 'Type': {"TypeName": None, "MSG": None, "LanguageID": None},
@@ -244,7 +244,7 @@ class Sql_database:
         while table in ["Error", "Solution"] and len(help_variables) == 3:
             type_id = self.get_ID("Type", ["LanguageID", lang_id], ["TypeName", help_variables[2]])
             if type_id == False:
-                self.add_type(lang_id, help_variables[2])
+                self.add_type(help_variables[0], help_variables[2])
                 if trys >= 5:
                     return False
                 else:
@@ -255,13 +255,17 @@ class Sql_database:
         keys=""
         vals="\'"
         for key in value:
-            keys += key+", "
+            keys += str(key)+", "
         for val in value.values():
-            vals += val+"\', \'"
+            val2=""
+            for i in str(val):
+                if i=="\'":
+                    val2+="\'"
+                val2+=i
+            vals += str(val2)+"\', \'"
         try:
             sql=insert.format(table, keys[:-2], vals[:-3])
-            print(sql)
-            #self.key.execute(sql)
+            self.key.execute(sql)
             return True
         except Error as exp:
             print(exp)
