@@ -13,6 +13,13 @@ class Sql_database:
         self.db_path = db_path
         self.init_db()
 
+    def __str__(self):
+        ret_str="Language: "+str(self.get_table("Language","Language, COUNT"))
+        ret_str+="\nType: "+str(self.get_table("Type","TypeName, Language, COUNT"))
+        ret_str+="\nErrors: "+str(self.get_table("Errors","ErrorID, Path, Line, MSG, COUNT"))
+        ret_str+="\nSolution: "+str(self.get_table("Solution","Priority, Solution"))
+        return ret_str
+
     def init_db(self):
         """
         Init's database
@@ -22,7 +29,7 @@ class Sql_database:
                 open(self.db_path, "a")
             except PermissionError as err:
                 print(err)
-                sys.exit(1)
+                sys.exit(1) item for innerlist in outerlist for item in innerlist ]
 
         self.conn = connect(self.db_path)
         self.conn.isolation_level = None
@@ -75,10 +82,10 @@ class Sql_database:
         :param regex_for_language: Optional argument, only for initial addition
         :return: True or False
         """
-        if len(self.execute("SELECT Language FROM Language where Language=" + language_name)) == 0:
+        if len(self.execute("SELECT Language FROM Language where Language=\'" + language_name+"\'")) == 0:
             return self.add_to_table("Language", [language_name, regex_for_language])
         else:
-            return self.edit_row_table("Language", {"COUNT": "COUNT + 1"}, "Language", language_name)
+            return self.count_increase("Language",language_name)
 
     def add_type(self, language: str, type_name: str, msg="NULL"):
         """
@@ -97,8 +104,12 @@ class Sql_database:
                 "UPDATE Type SET COUNT=COUNT + 1 WHERE TypeName=\'{}\' AND MSG=\'{}\' AND Language=\'{}\'".format(
                     str(type_name), str(msg), str(language)))
 
-    def remove_row_via_ID(self, table, table_pk, table_pk_value):
-        self.key.execute("DELETE FROM " + str(table) + " WHERE " + str(table_pk) + "=" + str(table_pk_value))
+    def remove_row_via_ID(self, table, table_pk, table_pk_value) -> bool:
+        try:
+            self.key.execute("DELETE FROM " + str(table) + " WHERE " + str(table_pk) + "=" + str(table_pk_value))
+            return True
+        except:
+            return False
 
     def get_errors(self) -> [tuple]:
         """Getting all errors from the Database - WIP"""
@@ -115,6 +126,17 @@ class Sql_database:
                 table + " WHERE " + table_var + " BETWEEN \'" + str(table_value_min) + "\' AND \'" + str(
                     table_value_max) + "\'", ids[table])
 
+    def restart_all(self) -> bool:
+        try:
+            self.execute("DELETE FROM Errors")
+            self.execute("DELETE FROM Solution")
+            self.execute("DELETE FROM Type")
+            self.execute("DELETE FROM Language")
+            return True
+        except Exception as error:
+            print(error)
+            return False
+        
     def add_solution(self, language: str, type_name: int, priority: int, solution: str, solved: bool = False):
         if len(self.execute("SELECT * FROM Solution WHERE Solution=" + solution)) == 0:
             self.add_to_table("Solution", [language, type_name, priority, solution])
@@ -125,14 +147,29 @@ class Sql_database:
             else:
                 self.execute(edit_sql.format("Unsolved", "Unsolved + 1", solution))
 
+    def restart_all(self) -> bool:
+        try:
+            self.execute("DELETE FROM Errors")
+            self.execute("DELETE FROM Solution")
+            self.execute("DELETE FROM Type")
+            self.execute("DELETE FROM Language")
+            return True
+        except Exception as error:
+            print(error)
+            return False
+        
     def get_TypeID(self, TypeName, Language):
         list1 = self.get_table("Type WHERE TypeName=\'" + str(TypeName) + "\'", "TypeID")
-        list2 = self.get_table("Type WHERE Language=\'" + str(Language) + "\'", "TypeID")
+        list2 = self.get_table("Type WHERE L item for innerlist in outerlist for item in innerlist ]anguage=\'" + str(Language) + "\'", "TypeID")
         for id1 in list1:
             for id2 in list2:
                 if id1[0] == id2[0]:
                     return id1[0]
         return False
+
+    def count_increase(self, table: str, id):
+        ids = {'Errors': "ErrorID", 'Type': "TypeID", 'Language': "Language", 'Solution': "SolutionID"}
+        self.execute("UPDATE {} SET COUNT=COUNT + 1 WHERE {} = '{}'".format(table, ids[table], str(id)))
 
     def add_Error(self, error: ErrorClass.Error) -> bool:
         """
@@ -146,24 +183,23 @@ class Sql_database:
             for row in types:
                 if row[2] == error.error_type and row[1] == lang:
                     language = self.get_table("Language WHERE Language=\'" + row[1] + "\'", "COUNT")
-                    self.edit_row_table("Type", {"COUNT": int(row[4] + 1)}, "TypeID", row[0])
-                    self.edit_row_table("Language", {"COUNT": language[0][0] + 1}, "Language", row[1])
+                    self.count_increase("Type", row[0])
+                    self.count_increase("Language", row[1])
                     errors_control = self.get_table("Errors", "MSG, Path, Line, COUNT, ErrorID")
                     for row in errors_control:
                         if row[0] == error.error_msg and row[1] == error.path and row[2] == error.line:
-                            self.edit_row_table("Error", {"COUNT": int(row[3]) + 1}, "ErrorID", row[4])
+                            self.count_increase("Errors", row[4])
                             return True
 
         if not ((lang,) in self.get_table("Language", "Language")):
-            print("SOME")
             for regex, language in constants.patterns.items():
                 if (type(language).__name__).replace("_error", "") == lang:
                     self.add_to_table("Language", [lang, regex])
         else:
             language = self.get_table("Language WHERE Language=\'" + lang + "\'", "COUNT")
-            self.edit_row_table("Language", {"COUNT": int(language[0][0]) + 1}, "Language", lang)
-        return self.add_to_table("Error",
-                                 [lang, error.error_type, error.path, error.line, error.error_msg, False, False])
+            self.count_increase("Language", lang)
+        return self.add_to_table("Errors",
+                                 [[lang, error.error_type], [error.path, error.line, error.error_msg, False, False]])
 
     def parse_table(self, template, variables) -> bool:
         i = 0
@@ -192,6 +228,7 @@ class Sql_database:
                 'Language': {"Language": None, "Regex": None},
                 'Solution': {"Solution": None, "Priority": None, "TypeID": None}}
 
+
         if table in values:
             for template in values:
                 if template in ["Errors", "Solution"] and template == table:
@@ -211,22 +248,26 @@ class Sql_database:
                     self.key.execute(sql)
                     response = len(self.key.fetchall())
                     if response == 0:
+
                         print("Not {} for curren {}".format(condition, table))
                         return False
 
                 if template == table:
                     value = self.parse_table(values[table], variables)
+
                     if table == "Solution":
                         value["Solved"] = "0"
                         value["Unsolved"] = "0"
                     else:
                         value["COUNT"] = "0"
                     if table in ["Errors", "Solution"]:
+
                         response = self.key.fetchall()[0][0]
                         value["TypeID"] = str(response)
 
                     sql = insert.format(table, ", " .join(value),
                                         "\', \'".join(value.values()))
+
                     try:
                         self.key.execute(sql)
                     except IntegrityError:

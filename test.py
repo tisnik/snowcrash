@@ -47,3 +47,4 @@ print(sql_database.add_to_table("Solution",[["Python", "KeyError"], ["Solution i
 print(sql_database.add_to_table("Type",["Python","KeyError", "Wrong Key"]))
 print(sql_database.add_to_table("Language",["Java", r"\tat [a-zA-Z.\/]+\([A-Za-z:.-_0-9 ]+\)"]))
 
+
