@@ -29,7 +29,7 @@ class Sql_database:
                 open(self.db_path, "a")
             except PermissionError as err:
                 print(err)
-                sys.exit(1)
+                sys.exit(1) item for innerlist in outerlist for item in innerlist ]
 
         self.conn = connect(self.db_path)
         self.conn.isolation_level = None
@@ -126,6 +126,17 @@ class Sql_database:
                 table + " WHERE " + table_var + " BETWEEN \'" + str(table_value_min) + "\' AND \'" + str(
                     table_value_max) + "\'", ids[table])
 
+    def restart_all(self) -> bool:
+        try:
+            self.execute("DELETE FROM Errors")
+            self.execute("DELETE FROM Solution")
+            self.execute("DELETE FROM Type")
+            self.execute("DELETE FROM Language")
+            return True
+        except Exception as error:
+            print(error)
+            return False
+        
     def add_solution(self, language: str, type_name: int, priority: int, solution: str, solved: bool = False):
         if len(self.execute("SELECT * FROM Solution WHERE Solution=" + solution)) == 0:
             self.add_to_table("Solution", [language, type_name, priority, solution])
@@ -149,7 +160,7 @@ class Sql_database:
         
     def get_TypeID(self, TypeName, Language):
         list1 = self.get_table("Type WHERE TypeName=\'" + str(TypeName) + "\'", "TypeID")
-        list2 = self.get_table("Type WHERE Language=\'" + str(Language) + "\'", "TypeID")
+        list2 = self.get_table("Type WHERE L item for innerlist in outerlist for item in innerlist ]anguage=\'" + str(Language) + "\'", "TypeID")
         for id1 in list1:
             for id2 in list2:
                 if id1[0] == id2[0]:
