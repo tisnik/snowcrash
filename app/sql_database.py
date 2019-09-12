@@ -87,14 +87,15 @@ class Sql_database:
                                                                                                           "Version=\'"
                                     + language_version + "\';")
         if len(language_ids) == 0:
-            return self.add_to_table("Language", [language_name, language_version, regex_for_language])
+            return self.add_to_table("Language", [language_name, regex_for_language, language_version])
         else:
             return self.count_increase("LanguageID", language_ids[0][0])
 
-    def add_type(self, language_id: int, type_name: str, msg="NULL"):
+    def add_type(self, language: str, type_name: str, language_version: int = False, msg="NULL"):
         """
         Adding type of error to DB
-        :param language_id: id of existing language
+        :param language_version:
+        :param language: language of the string
         :param type_name: like (AssertionError)
         :param msg: msg of the type of the error
         :return: True or False
@@ -102,11 +103,12 @@ class Sql_database:
         if len(self.execute(
                 "SELECT TypeName, MSG FROM Type WHERE TypeName=\'{}\' AND MSG=\'{}\'".format(type_name,
                                                                                              str(msg)))) == 0:
-            return self.add_to_table("Type", [language_id, type_name, msg])
+            return self.add_to_table("Type", [type_name, msg], [language, language_version])
         else:
             return self.execute(
-                "UPDATE Type SET COUNT=COUNT + 1 WHERE TypeName=\'{}\' AND MSG=\'{}\' AND LanguageID=\'{}\'".format(
-                    str(type_name), str(msg), str(language_id)))
+                "UPDATE Type SET COUNT=COUNT + 1 WHERE TypeName=\'{}\' AND MSG=\'{}\' AND LanguageID ="
+                " (SELECT LanguageID FROM Language WHERE Language={} AND Version={})".format(
+                    str(type_name), str(msg), str(language), str(language_version)))
 
     def remove_row_via_ID(self, table, table_pk, table_pk_value) -> bool:
         try:
@@ -130,9 +132,9 @@ class Sql_database:
                 table + " WHERE " + table_var + " BETWEEN \'" + str(table_value_min) + "\' AND \'" + str(
                     table_value_max) + "\'", ids[table])
 
-    def add_solution(self, language_id: str, type_name: int, priority: int, solution: str, solved: bool = False):
+    def add_solution(self, language: str, type_name: int, priority: int, solution: str, solved: bool = False):
         if len(self.execute("SELECT * FROM Solution WHERE Solution=" + solution)) == 0:
-            self.add_to_table("Solution", [language_id, type_name, priority, solution])
+            self.add_to_table("Solution", [priority, solution], [language, False, type_name])
         else:
             edit_sql = "UPDATE Solution SET {}={} WHERE Solution={}"
             if solved:
@@ -191,7 +193,7 @@ class Sql_database:
             language = self.get_table("Language WHERE Language=\'" + lang + "\'", "COUNT")
             self.count_increase("Language", lang)
         return self.add_to_table("Error",
-                                 [[lang, error.error_type], [error.path, error.line, error.error_msg, False, False]])
+                                 [error.path, error.line, error.error_msg], [lang, False, error.error_type])
 
     def parse_table(self, template, variables) -> bool:
         i = 0
