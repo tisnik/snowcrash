@@ -4,7 +4,7 @@ from app import language_identity
 from app.sql_database import *
 
 import os
-
+"""
 sql_database = Sql_database()
 
 errors = []
@@ -20,7 +20,7 @@ for i in range(len(errors)):
     errors[i] = language_identity.identify(errors[i])
     sql_database.add_Error(errors[i])
     print(errors[i])
-
+"""
 """
 # Working
 test = Sql_database()  # Create Test connect to database memory.db
@@ -42,8 +42,16 @@ except Exception as error:
 #IndexError: list index out of range
 #"""))))  # (Not Working#1)
 
+from app import sql_database
+d = Database()
+d.add("Language", language="Java", regex=r"\tat [a-zA-Z.\/]+\([A-Za-z:.-_0-9 ]+\)", version="openjdk version 1.8.0_222")
+d.add("Type", language="Java", type_name="NameError", msg="name resoult is not defined")
+d.add("Error", "Java", "NameError", msg="name resoult is not defined", path="/home/", line=5)
+d.add("Solution", "Java", "NameError", priority=0, solution="CTRL + DELETE")
+#d.delete(Error, id=1)
+"""
 print(sql_database.add_to_table("Errors", [["Python","KeyError"],["some.py", 5, "Some Message", False, False]]))
 print(sql_database.add_to_table("Solution",[["Python", "KeyError"], ["Solution is C+A DELETE", 0]]))
 print(sql_database.add_to_table("Type",["Python","KeyError", "Wrong Key"]))
 print(sql_database.add_to_table("Language",["Java", r"\tat [a-zA-Z.\/]+\([A-Za-z:.-_0-9 ]+\)"]))
-
+"""

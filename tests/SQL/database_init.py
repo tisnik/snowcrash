@@ -13,6 +13,9 @@ class Language(Base):
     version = Column(String(250))
     count = Column(Integer, nullable=False)
 
+    def __init__(self, **kwargs):
+        super(Language, self).__init__(**kwargs)
+
 class Type(Base):
     __tablename__ = "Type"
     id = Column(Integer, primary_key=True, nullable=False)
