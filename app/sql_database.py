@@ -40,10 +40,16 @@ class Database:
                                        .first()
 
     def get(self, table, id):
-        return self.session.query(table).filter(table.id == id).first()
+        data = self.session.query(table).filter(table.id == id).first()
+        if not data:
+            print("Not found record with this id: {} in table {}".format(id, table.__name__))
+        return data
 
     def get_all(self, table):
-        return self.session.query(table).all()
+        data = self.session.query(table).all()
+        if not data:
+            print("Not found records  in table {}".format(table.__name__))
+        return data
 
     def delete(self, table, id):
         self.session.query(table).filter(table.id == id).delete()
@@ -53,60 +59,83 @@ class Database:
          self.session.query(table).delete()
          self.session.commit()
 
-    def add(self, name, *args, **kwargs):
-        if name == "Language":
-            table = Language(**kwargs)
-            result = self.check_Language(table)
-        if name == "Type":
-            table = Type(**kwargs)
-            result = self.check_Type(table)
-            if not result:
-                language = self.session.query(Language)\
-                                      .filter(Language.language == table.language)\
-                                      .first()
-                table.language_id = language.id
-                table.language = language
-        
-        if name in ["Error", "Solution"]:
-            if name == "Error":
-                table = Error(**kwargs)
-                result = self.check_Error(table)
-            if name == "Solution":
-                table = Solution(**kwargs)
-                result = self.check_Solution(table)
-            if not result:
-                print(args)
-                type = self.session.query(Type)\
+    def add_Language(self, *args, **kwargs):
+        table = Language(**kwargs)
+        return table, self.check_Language(table)
+
+    def add_Type(self, *args, **kwargs):
+        table = Type(**kwargs)
+        result = self.check_Type(table)
+        if not result:
+            language = self.session.query(Language)\
+                                    .filter(Language.language == table.language)\
+                                    .first()
+            table.language_id = language.id
+            table.language = language
+        return table, result
+
+    def get_Type(self, table, *args):
+        try:
+            data =  self.session.query(Type)\
                                       .filter(self.get(Type, Type.language_id).language.language == args[0])\
                                       .filter(Type.type_name == args[1])\
                                       .first()
-                print(type)
-                print(type.id)
-                table.type_id = type.id
-                table.type = type
-        if name == "Error":
-            if not result:
-                table.first = time()
-            else:
-                result.last = time()
-        if name == "Solution" and not result:
+            return data
+        except AttributeError:
+            print("This type or Language does not exist")
+
+    def add_Error(self, *args, **kwargs):
+        table = Error(**kwargs)
+        result = self.check_Error(table)
+        if not result:
+            type = self.get_Type(table, *args)
+            table.type_id = type.id
+            table.type = type
+            table.first = time()
+        else:
+            result.last = time()
+        return table, result      
+                
+    def add_Solution(self, *args, **kwargs):
+        table = Solution(**kwargs)
+        result = self.check_Solution(table)
+        if not result:
+            type = self.get_Type(table, *args)
+            table.type_id = type.id
+            table.type = type
             table.solved = 0
             table.unsolved = 0
-        if not result and table != "Solution":
-            table.count = 0
-    
+        return table, result
+
+    def add(self, name, *args, **kwargs):
+        if name == "Language":
+            table, result = self.add_Language(*args, **kwargs)            
+        elif name == "Type":
+            table, result = self.add_Type(*args, **kwargs)
+        elif name == "Error":
+            table, result = self.add_Error(*args, **kwargs)
+        elif name == "Solution":
+            table, result = self.add_Solution(*args, **kwargs)
+
+        if not result:
+            if name != "Solution":
+                table.count = 0
+            tmp = table
+        else:
+            if name != "Language":
+                tmp = result
+        
+        if name == "Type":
+            self.get(Language, tmp.language_id).count += 1
+        elif name != "Language":
+            type = self.get(Type, tmp.type_id)
+            type.count += 1
+            self.get(Language, type.language_id).count += 1
+        
         if result:
-            if table.__class__.__name__ != "Solution":
+            if name != "Solution":
                 result.count += 1
-            else:
-                return False
         else:
             self.session.add(table)
         self.session.commit()
         return True
-        
-        
-
-
-
-        
