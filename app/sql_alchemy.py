@@ -3,6 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from tests.SQL.database_init import Type, Error, Solution, Language 
 from sqlalchemy import update
 from time import time
+import sys
  
 class Database:
 
@@ -43,12 +44,14 @@ class Database:
         data = self.session.query(table).filter(table.id == id).first()
         if not data:
             print("Not found record with this id: {} in table {}".format(id, table.__name__))
+            sys.exit(2)
         return data
 
     def get_all(self, table):
         data = self.session.query(table).all()
         if not data:
             print("Not found records  in table {}".format(table.__name__))
+            sys.exit(3)
         return data
 
     def delete(self, table, id):
@@ -70,8 +73,13 @@ class Database:
             language = self.session.query(Language)\
                                     .filter(Language.language == table.language)\
                                     .first()
-            table.language_id = language.id
-            table.language = language
+            if language:
+                table.language_id = language.id
+                table.language = language
+            else:
+                print("Missing row {} in table Language".format(table.language))
+                sys.exit(1)
+
         return table, result
 
     def get_Type(self, table, *args):
@@ -83,6 +91,7 @@ class Database:
             return data
         except AttributeError:
             print("This type or Language does not exist")
+            sys.exit(4)
 
     def add_Error(self, *args, **kwargs):
         table = Error(**kwargs)
