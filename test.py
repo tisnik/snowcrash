@@ -1,7 +1,7 @@
 from app import ErrorClass
 from app import bug_search
 from app import language_identity
-from app.sql_database import *
+from app.sql_alchemy import *
 
 import os
 
@@ -29,3 +29,4 @@ d.add("Language", language="Java", regex=r"\tat [a-zA-Z.\/]+\([A-Za-z:.-_0-9 ]+\
 d.add("Type", language="Java", type_name="NameError", msg="name resoult is not defined")
 d.add("Error", "Java", "NameError", msg="name resoult is not defined", path="/home/", line=5)
 d.add("Solution", "Java", "NameError", priority=0, solution="CTRL + DELETE")
+d.update(Type, Type.count, 1, 2)

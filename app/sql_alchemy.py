@@ -54,6 +54,15 @@ class Database:
             sys.exit(3)
         return data
 
+    def update(self, table, column, id, data):
+        table = self.get(table, id)
+        try:
+            table.column = data
+        except AttributeError as error:
+            print(error)
+            sys.exit(5)
+        self.session.commit()
+
     def delete(self, table, id):
         self.session.query(table).filter(table.id == id).delete()
         self.session.commit()
