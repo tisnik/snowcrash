@@ -121,7 +121,7 @@ class Sql_database:
     def get_errors(self) -> [tuple]:
         """Getting all errors from the Database - WIP"""
         return self.execute(
-            "SELECT Path, Line, Error.MSG, First, Last, Error.COUNT, Type.Language, Type.TypeName FROM Error LEFT "
+            "SELECT Path, Line, Error.MSG, First, Last, Error.COUNT, Type.LanguageID, Type.TypeName FROM Error LEFT "
             "JOIN Type ON Error.TypeID=Type.TypeID")
 
     def get_rows_ID(self, table, table_var, table_value_min, table_value_max=False):

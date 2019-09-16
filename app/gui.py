@@ -1,14 +1,24 @@
 from tkinter import *
 from random import *
+#from .app import *
 
 class Gui:
     def __init__(self):
-        self.window = Tk()
-        self.window.geometry("500x500+0+0")
-        self.window.tk_setPalette("grey55")
-        self.window.overrideredirect(1)
+        self.log=""
+        self.master = Tk()
+        self.master.geometry("500x500+0+0")
+        self.master.minsize(300,180)
+        self.master.tk_setPalette("grey55")
+        self.master.overrideredirect(1)
+        self.outline_window = Frame(self.master,bg="Black",cursor="fleur")
+        self.outline_window.pack(fill=BOTH,ipadx=2,ipady=2,padx=1,pady=1)
+        self.window = Frame(self.outline_window,cursor="arrow")
+        self.window.pack(fill=BOTH,ipadx=2,ipady=2)
+        self.outline_window.bind("<ButtonPress-1>",lambda event, a="Press": self.move(a,event))
+        self.outline_window.bind("<ButtonRelease-1>",lambda event, a="Release": self.move(a,event))
+        self.outline_window.bind("<B1-Motion>",self.on_motion_resize)
         self.bind("<Control-r>",self.change_palette)
-        self.bind("<Control-Shift-r>",self.change_palette)
+        self.bind("<Control-R>",self.change_palette)
         self.bind("<Map>",self.overrideredirect)
         self.bind("<Control-p> <Control-P>",self.change_palette)
         self.geometry=[500,500,50,50]
@@ -16,7 +26,7 @@ class Gui:
         self.geometrymax=[self.window.winfo_screenwidth(),self.window.winfo_screenheight(),0,0]
         self.init_menu_bar()
         self.openMenu=""
-        self.window.mainloop()
+        self.master.mainloop()
     
     def init_menu_bar(self,null=False):
         self.menu_of_menues=Frame(self.window,width=self.geometry[0],relief=RIDGE, bg="darkblue")
@@ -25,26 +35,26 @@ class Gui:
         self.but=[]
         self.menu_buttons=[]
         list_of_menu_buttons=[["File","Menu",
-                                [["Insert log",lambda: None],
-                                ["Load log",lambda: None],
-                                ["Run app to get log",lambda: None],
-                                ["Set random Palette  Ctrl+P",lambda: self.change_palette()],
-                                ["Exit",lambda: self.window.destroy()]]],
+                                [["Insert log",lambda: self.info("InsLog")],
+                                ["Load log",lambda: self.info("LoadLog")],
+                                ["Run app to get log",lambda: self.info("RATGL")],
+                                ["Set random Palette  Ctrl+P",self.change_palette],
+                                ["Exit",self.master.destroy]]],
                             ["Run","Menu",
-                                [["Withou DB    Ctrl+Shift+R",lambda: None],
-                                ["With DB        Ctrl+R",lambda: None],
-                                ["Show DB",lambda: None],
-                                ["Add solution",lambda: None],
-                                ["solve (add in future)",lambda: None]]],
-                            ["Setting","Button",lambda:print("\r")],
+                                [["Withou DB    Ctrl+Shift+R",lambda: self.info("NoneDB")],
+                                ["With DB        Ctrl+R",lambda: self.info("WithDB")],
+                                ["Show DB",lambda: self.info("ShowDB")],
+                                ["Add solution",lambda: self.info("AddSolu")],
+                                ["solve (add in future)",lambda: self.info("Solve")]]],
+                            ["Setting","Button",lambda: self.info("Setting")],
                             ["Help","Menu",
-                                [["About",lambda: None],
-                                ["Licence",lambda: None],
-                                ["Pls help",lambda: None],
-                                ["Update",lambda: None]]],
-                            ["X","Button_right",lambda:self.window.destroy()],
-                            [u"⃞","Button_right",lambda:self.maxmalize()],
-                            ["_","Button_right",lambda:self.minimalize()],
+                                [["About",lambda: self.info("About")],
+                                ["Licence",lambda: self.info("Licence")],
+                                ["Pls help",lambda: self.info("PlsHelp")],
+                                ["Update",lambda: self.info("Update")]]],
+                            ["X","Button_right",self.master.destroy],
+                            [u"⃞","Button_right",self.maxmalize],
+                            ["_","Button_right",self.minimalize],
                             [u"⛄  SnowCrash","Label_Center"]]
         for item in list_of_menu_buttons:
             if item[1] == "Label": 
@@ -66,30 +76,30 @@ class Gui:
         self.line=Label(self.menu)
         self.menu_of_menues.pack(fill=X,side=TOP)
         self.menu.pack(padx=(0,0),pady=(0,2),fill=X)
-        self.bind("<<MenuSlection>>",lambda event, a="Press": self.move(a,event))
-        self.bind("<<MenuSlection>>",lambda event, a="Release": self.move(a,event))
-        self.bind("<<MenuSelection-Motion>>",self.on_motion)
+        self.menu.bind("<ButtonPress-1>",lambda event, a="Press": self.move(a,event))
+        self.menu.bind("<ButtonRelease-1>",lambda event, a="Release": self.move(a,event))
+        self.menu.bind("<B1-Motion>",self.on_motion)
 
     def maxmalize(self,null=False):
         if self.screen=="max":
             self.screen="ret"
-            self.window.wm_state('zoomed')
+            self.master.wm_state('zoomed')
         else:
             self.screen="max"
-            self.window.wm_state('normal')
+            self.master.wm_state('normal')
     
     def minimalize(self,null=False):
-        self.window.overrideredirect(0)
-        self.window.wm_state('iconic')
+        self.master.overrideredirect(0)
+        self.master.wm_state('iconic')
 
     def overrideredirect(self,null=False):
-        if self.window.state()=='iconic':
-            self.window.overrideredirect(0)
+        if self.master.state()=='iconic':
+            self.master.overrideredirect(0)
         else:
-            self.window.overrideredirect(1)
+            self.master.overrideredirect(1)
 
     def change_palette(self,null=False):
-        self.window.tk_setPalette("#{:06x}".format(randint(0, 0xFFFFFF)))
+        self.master.tk_setPalette("#{:06x}".format(randint(0, 0xFFFFFF)))
 
     def bind(self,what,todo):
         if " " in what:
@@ -97,7 +107,7 @@ class Gui:
         else:
             items=[what]
         for item in items:
-            self.window.bind(item, todo)
+            self.master.bind(item, todo)
 
     def move(self,button,mouse):
         if button=="Release":
@@ -106,12 +116,16 @@ class Gui:
         else:
             self.x = mouse.x
             self.y = mouse.y
-        
         self.geometrymax=[self.window.winfo_screenwidth(),self.window.winfo_screenheight(),0,0]
 
     def on_motion(self,mouse=False):
         self.geometry[2:4]=self.geometry[2]+mouse.x-self.x, self.geometry[3]+mouse.y-self.y
-        self.window.geometry("{}x{}+{}+{}".format(str(self.geometry[0]),str(self.geometry[1]),str(self.geometry[2]),str(self.geometry[3])))
+        self.master.geometry("{}x{}+{}+{}".format(str(self.geometry[0]),str(self.geometry[1]),str(self.geometry[2]),str(self.geometry[3])))
+    
+    def on_motion_resize(self,mouse=False):
+        self.geometry[0:2]=self.geometry[0]+mouse.x-self.x, self.geometry[1]+mouse.y-self.y
+        self.move("Press",mouse)
+        self.master.geometry("{}x{}+{}+{}".format(str(self.geometry[0]),str(self.geometry[1]),str(self.geometry[2]),str(self.geometry[3])))
     
     def printmenu(self,text,func,menu,null=False):
         if self.sub_menu.winfo_manager() != "pack":
@@ -130,5 +144,23 @@ class Gui:
             self.but=[]
             self.openMenu=""
 
+    def info(self,inp,null=False):
+        """ 
+        "Insert log"         - "InsLog"     - 
+        "Load log"           - "LoadLog"    -
+        "Run app to get log" - "RATGL"      -
+        "Withou DB"          - "NoneDB"     -
+        "With DB"            - "WithDB"     -
+        "Show DB"            - "ShowDB"     -
+        "Add solution"       - "AddSolu"    -
+        "solve"              - "Solve"      -
+        "Setting"            - "Setting"    -
+        "About"              - "About"      -
+        "Licence"            - "Licence"    -
+        "Pls help"           - "PlsHelp"    -
+        "Update"             - "Update"     -
+        """
+        print(inp)
+        
 if __name__ == "__main__":
     gui = Gui()

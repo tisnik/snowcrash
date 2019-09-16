@@ -2,7 +2,7 @@ from app import bug_search, language_identity
 from app.sql_database import Sql_database
 
 
-def show_db():
+def show_db(event=False):
     """Printout all errors in DB"""
     db = Sql_database()
     errors = db.get_errors()
@@ -13,18 +13,18 @@ def show_db():
     return text
 
 
-def get_processed_log(log):
+def get_processed_log(log,event=False):
     """Processing log to object"""
     clear_log = bug_search.get_error_from_log(log)
     return language_identity.identify(clear_log)
 
 
-def print_log(log):
+def print_log(log,event=False):
     """Printing processed log"""
     print(get_processed_log(log))
 
 
-def load_from_file(filename):
+def load_from_file(filename,event=False):
     """Loading log from file"""
     data = ""
     with open(filename) as f:
@@ -33,7 +33,7 @@ def load_from_file(filename):
     return data
 
 
-def process_log(log):
+def process_log(log,event=False):
     """Processing log and adding to the DB"""
     error = get_processed_log(log)
     db = Sql_database()
@@ -41,7 +41,7 @@ def process_log(log):
     return str(error) + ": ", {True: "Success", False: "Failed"}[success]
 
 
-def add_solution(log, solution, priority, solved):
+def add_solution(log, solution, priority, solved,event=False):
     log = get_processed_log(log)
     db = Sql_database()
     db.add_solution(type(log).__name__.replace("_error", ""), log.error_type, priority, solution, solved)
