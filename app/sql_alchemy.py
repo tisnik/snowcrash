@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from tests.SQL.database_init import Type, Error, Solution, Language 
 from sqlalchemy import update
-from time import time
+from datetime import datetime
 import sys
  
 class Database:
@@ -109,9 +109,9 @@ class Database:
             type = self.get_Type(table, *args)
             table.type_id = type.id
             table.type = type
-            table.first = time()
+            table.first = datetime.utcnow().timestamp()
         else:
-            result.last = time()
+            result.last = datetime.utcnow().timestamp()
         return table, result      
                 
     def add_Solution(self, *args, **kwargs):
