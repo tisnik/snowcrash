@@ -152,12 +152,12 @@ class ThemeSettings(Frame):
 
     def onclick_event(self, button):
         if button == "color_picker":
-            self.color = askcolor(color=self.color, parent=self, title="Pick color")
-            self.color_picker.config(bg=self.color[1])
+            self.color = askcolor(color=str(self.color), parent=self, title="Pick color")[1]
+            self.color_picker.config(bg=self.color)
         elif button == 'ok':
             self.parent.parent.quit()
         elif button == 'apply':
-            self.parent.parent.tk_setPalette(self.color[1])
+            self.parent.parent.tk_setPalette(self.color)
         elif button == 'cancel':
             self.parent.parent.quit()
 
