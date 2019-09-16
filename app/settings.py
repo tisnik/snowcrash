@@ -2,6 +2,44 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter.colorchooser import askcolor
 from tkinter.font import *
+from json import dumps, loads, decoder
+import os
+
+
+def get_path(path=None):
+        if path:
+            return path
+        else:
+            return input("Please enter path of your config file: ")
+
+def import_setting(path=None):
+    path = get_path(path)
+    if os.path.isfile(path):
+        try:
+            with open(path) as f:
+                return loads(f.read(), strict=False)
+        except decoder.JSONDecodeError as error:
+            print(error)
+            print("File:\"{}\" is not JSON".format(path))
+            return False
+    else:
+        print("File:\"{}\" not exist".format(path))
+        return False
+
+def export_setting(setting, path=None):
+    path = get_path(path)
+    try:
+        with open(path, "w") as f:
+            f.write(dumps(setting))
+            return True
+    except NotADirectoryError as error:
+        print(error)
+        print("Not existing directory: {}".foramt(path))
+    except decoder.JSONDecodeError as error:
+            print(error)
+            print("Setting: \"{}\" is not JSON".format(setting))
+    return False
+
 
 
 class Settings(Frame):
@@ -12,6 +50,7 @@ class Settings(Frame):
         self.db = None
         self.theme = None
         self.parent = parent
+        self.setting = None
         self.list_of_pages = ['Database', 'Theme', 'Close']
         self.pack(fill=BOTH, expand=True)
         self.init_list_settings()
