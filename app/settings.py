@@ -1,4 +1,6 @@
 from tkinter import *
+from tkinter import filedialog
+from tkinter.colorchooser import askcolor
 from tkinter.font import *
 
 
@@ -50,6 +52,7 @@ class DBSettings(Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
+        self.db_file_file = "memory.db"
         self.pack(side=LEFT, ipadx=10000, fill=BOTH, expand=True)
         self.show_settings()
 
@@ -57,13 +60,31 @@ class DBSettings(Frame):
         Label(self, text="Database configuration", width=int(self.parent.winfo_width() / 30), font=Font(size=30)) \
             .grid(row=0, column=0, columnspan=3)
         Label(self, text="Database location: ").grid(row=1, column=0, sticky="we")
-        db_file = Entry(self).grid(row=1, column=1, sticky="we")
-        Button(self, text="Select file").grid(row=1, column=2)
-        print(self.parent.winfo_height())
-        Label(self, text=" ").grid(row=2, column=0, pady=self.parent.winfo_height()/2.5)
-        Button(self, text="OK").grid(row=2, column=0, sticky="es")
-        Button(self, text="Apply").grid(row=2, column=1, sticky="wes")
-        Button(self, text="Cancel").grid(row=2, column=2, sticky="ws")
+        self.db_file = Entry(self)
+        self.db_file.grid(row=1, column=1, sticky="we")
+        file = Button(self, text="Select file", command=lambda: self.onclick_event(button="select_file"))
+        file.grid(row=1, column=2)
+
+        Label(self, text=" ").grid(row=2, column=0, pady=self.parent.winfo_height() / 2.5)
+        ok = Button(self, text="OK", command=lambda: self.onclick_event(button="ok"))
+        ok.grid(row=2, column=0, sticky="es")
+        apply = Button(self, text="Apply", command=lambda: self.onclick_event(button="apply"))
+        apply.grid(row=2, column=1, sticky="wes")
+        cancel = Button(self, text="Cancel", command=lambda: self.onclick_event("cancel"))
+        cancel.grid(row=2, column=2, sticky="ws")
+
+    def onclick_event(self, button):
+        if button == 'cancel':
+            self.parent.parent.quit()
+        elif button == 'ok':
+            self.db_file_file = self.db_file.get()
+            self.parent.parent.quit()
+        elif button == 'apply':
+            self.db_file_file = self.db_file.get()
+        elif button == 'select_file':
+            filename = filedialog.askopenfilename()
+            self.db_file.delete(0, 'end')
+            self.db_file.insert(0, filename)
 
 
 class ThemeSettings(Frame):
@@ -71,18 +92,43 @@ class ThemeSettings(Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
+        self.color = "grey55"
         self.pack(side=LEFT, ipadx=10000, fill="both", expand=True)
         self.show_settings()
 
     def show_settings(self):
-        Label(self, text="Theme configuration", font=Font(size=30)).pack()
+        Label(self, text="Theme configuration", width=int(self.parent.winfo_width() / 30), font=Font(size=30)) \
+            .grid(row=0, column=0, columnspan=3)
+        Label(self, text="Theme color: ").grid(row=1, column=0)
+        self.color_picker = Button(self, text="Pick color", command=lambda: self.onclick_event(button="color_picker"))
+        self.color_picker.grid(row=1, column=1)
+
+        Label(self, text=" ").grid(row=2, column=0, pady=self.parent.winfo_height() / 2.5)
+        ok = Button(self, text="OK", command=lambda: self.onclick_event(button="ok"))
+        ok.grid(row=2, column=0, sticky="es")
+        apply = Button(self, text="Apply", command=lambda: self.onclick_event(button="apply"))
+        apply.grid(row=2, column=1, sticky="wes")
+        cancel = Button(self, text="Cancel", command=lambda: self.onclick_event("cancel"))
+        cancel.grid(row=2, column=2, sticky="ws")
+
+    def onclick_event(self, button):
+        if button == "color_picker":
+            self.color = askcolor(color=self.color, parent=self, title="Pick color")
+            self.color_picker.config(bg=self.color[1])
+        elif button == 'ok':
+            self.parent.parent.quit()
+        elif button == 'apply':
+            self.parent.parent.tk_setPalette(self.color[1])
+        elif button == 'cancel':
+            self.parent.parent.quit()
 
 
 def init_settings():
     window = Tk()
     window.wm_attributes('-type', 'splash')
     window.geometry("1280x720")
-    window.tk_setPalette("grey55")
+    color = "grey55"
+    window.tk_setPalette(color)
     app = Settings(window)
     app.mainloop()
 
