@@ -1,5 +1,1 @@
-{
-	"db-path" : "memory.db",
-	"color-theme" : "#8C8C8C",
-	"db-type" : "sqlite3"
-}
+{"db-path": "memory.db", "db-type": "sqlite3", "color": "#f68c8c", "geometry": "1280x720"}

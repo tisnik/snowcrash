@@ -50,7 +50,7 @@ class Settings(Frame):
         self.db = None
         self.theme = None
         self.parent = parent
-        self.setting = None
+        self.setting = import_setting("config.json")
         self.list_of_pages = ['Database', 'Theme', 'Close']
         self.pack(fill=BOTH, expand=True)
         self.init_list_settings()
@@ -91,7 +91,8 @@ class DBSettings(Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.db_file_file = "memory.db"
+        self.setting = import_setting("config.json")
+        self.db_file_file = setting["db-path"]
         self.pack(side=LEFT, ipadx=10000, fill=BOTH, expand=True)
         self.show_settings()
 
@@ -100,6 +101,7 @@ class DBSettings(Frame):
             .grid(row=0, column=0, columnspan=3)
         Label(self, text="Database location: ").grid(row=1, column=0, sticky="we")
         self.db_file = Entry(self)
+        self.db_file.insert(END, self.setting["db-path"])
         self.db_file.grid(row=1, column=1, sticky="we")
         file = Button(self, text="Select file", command=lambda: self.onclick_event(button="select_file"))
         file.grid(row=1, column=2)
@@ -131,7 +133,8 @@ class ThemeSettings(Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.color = "grey55"
+        self.setting = import_setting("config.json")
+        self.color = self.setting["color"]
         self.pack(side=LEFT, ipadx=10000, fill="both", expand=True)
         self.show_settings()
 
@@ -154,7 +157,9 @@ class ThemeSettings(Frame):
         if button == "color_picker":
             self.color = askcolor(color=str(self.color), parent=self, title="Pick color")[1]
             self.color_picker.config(bg=self.color)
+            self.setting["color"] = self.color
         elif button == 'ok':
+            export_setting(self.setting, "config.json")
             self.parent.parent.quit()
         elif button == 'apply':
             self.parent.parent.tk_setPalette(self.color)
@@ -164,9 +169,10 @@ class ThemeSettings(Frame):
 
 def init_settings():
     window = Tk()
+    setting = import_setting("config.json")
     window.wm_attributes('-type', 'splash')
-    window.geometry("1280x720")
-    color = "grey55"
+    window.geometry(setting["geometry"])
+    color = setting["color"]
     window.tk_setPalette(color)
     app = Settings(window)
     app.mainloop()
