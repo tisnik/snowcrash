@@ -82,4 +82,6 @@ class Gui:
             items=[what]
         for item in items:
             self.window.bind(item, todo)
-gui=Gui()
+
+if __name__ == "__main__":
+    gui = Gui()
