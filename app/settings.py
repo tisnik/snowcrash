@@ -45,10 +45,11 @@ def export_setting(setting, path=None):
 
 class Settings(Frame):
 
-    def __init__(self, parent):
+    def __init__(self, parent, master):
         super().__init__(parent)
         self.listbox = None
         self.db = None
+        self.master = master
         self.theme = None
         self.parent = parent
         self.setting = import_setting("app/config.json")
@@ -84,7 +85,7 @@ class Settings(Frame):
             self.db.pack_forget()
             self.db = None
         if self.theme is None:
-            self.theme = ThemeSettings(self)
+            self.theme = ThemeSettings(self, self.master)
 
 
 class DBSettings(Frame):
@@ -131,9 +132,10 @@ class DBSettings(Frame):
 
 class ThemeSettings(Frame):
 
-    def __init__(self, parent):
+    def __init__(self, parent, master):
         super().__init__(parent)
         self.parent = parent
+        self.master = master
         self.setting = import_setting("app/config.json")
         self.color = self.setting["color"]
         self.pack(side=LEFT, ipadx=10000, fill="both", expand=True)
@@ -161,6 +163,7 @@ class ThemeSettings(Frame):
             self.setting["color"] = self.color
         elif button == 'ok':
             export_setting(self.setting, "app/config.json")
+            self.master.tk_setPalette(self.color)
             self.parent.parent.destroy()
         elif button == 'apply':
             self.parent.parent.tk_setPalette(self.color)
@@ -168,7 +171,7 @@ class ThemeSettings(Frame):
             self.parent.parent.destroy()
 
 
-def init_settings():
+def init_settings(master):
     window = Tk()
     setting = import_setting("app/config.json")
     if platform.system() == 'Windows':
@@ -178,7 +181,7 @@ def init_settings():
     window.geometry(setting["geometry"])
     color = setting["color"]
     window.tk_setPalette(color)
-    app = Settings(window)
+    app = Settings(window, master)
     app.mainloop()
 
 

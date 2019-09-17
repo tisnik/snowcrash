@@ -256,9 +256,7 @@ class Gui:
         elif inp == "Solve":
             print("Not implemented yet")
         elif inp == "Setting":
-            settings.init_settings()
-            self.settings=settings.import_setting("app/config.json")
-            self.window.tk_setPalette(self.settings['color'])
+            settings.init_settings(self.master)
         elif inp == "About":
             help.Help_Dialog(data_file="./ABOUT")
         elif inp == "Licence":
@@ -267,6 +265,9 @@ class Gui:
             help.Help_Dialog(data_file="./README.md")
         elif inp == "Update":
             print("Not implemented yet")
+        print("haha")
+        self.master.destroy()
+        self.master.mainloop()
 
     def clear_info(self):
         if self.info_function == "input_some":
