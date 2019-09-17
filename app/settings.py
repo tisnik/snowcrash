@@ -1,4 +1,5 @@
 from tkinter import *
+import platform
 from tkinter import filedialog
 from tkinter.colorchooser import askcolor
 from tkinter.font import *
@@ -170,7 +171,10 @@ class ThemeSettings(Frame):
 def init_settings():
     window = Tk()
     setting = import_setting("app/config.json")
-    window.overrideredirect(1)
+    if platform.system() == 'Windows':
+        window.overrideredirect(1)
+    else:
+        window.wm_attributes('-type', 'splash')
     window.geometry(setting["geometry"])
     color = setting["color"]
     window.tk_setPalette(color)

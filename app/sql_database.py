@@ -4,9 +4,11 @@ import sys
 try:
     from app import constants
     from app import ErrorClass
+    from app import settings
 except:
     import constants
     import ErrorClass
+    import settings
 
 
 class Sql_database:

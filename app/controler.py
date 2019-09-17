@@ -1,3 +1,4 @@
+import subprocess
 try:
     from app import bug_search, language_identity
     from app.sql_database import Sql_database
