@@ -45,3 +45,8 @@ def add_solution(log, solution, priority, solved,event=False):
     log = get_processed_log(log)
     db = Sql_database()
     db.add_solution(type(log).__name__.replace("_error", ""), log.error_type, priority, solution, solved)
+
+
+def run_app(pathToApp):
+    log = pathToApp
+    return log
