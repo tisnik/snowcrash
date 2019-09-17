@@ -1,4 +1,6 @@
 from tkinter import *
+import tkinter.simpledialog as sm
+import tkinter.messagebox as ms
 from random import *
 from app import controler, settings, help
 
@@ -175,25 +177,41 @@ class Gui:
         elif inp == "LoadLog":
             pass
         elif inp == "RATGL":
-            controler.run_app("")
+            self.master.withdraw()
+            d = sm.askstring("Run app to get log", "Enter Command: ", parent=self.window)
+            d = d.split(" ")
+            d = controler.run_app(d)
+            self.master.deiconify()
+            print(d)
+            self.log = d
         elif inp == "NoneDB":
-            controler.get_processed_log(self.log)
+            text = controler.get_processed_log(self.log)
+            print(text)
+            help.Help_Dialog(data=text)
         elif inp == "WithDB":
-            controler.process_log(self.log)
+            text = controler.process_log(self.log)
+            print(text)
+            help.Help_Dialog(data=text)
         elif inp == "ShowDB":
-            controler.show_db()
+            text = controler.show_db()
+            print(text)
+            help.Help_Dialog(data=text)
         elif inp == "AddSolu":
-            pass
+            self.master.withdraw()
+            controler.add_solution(self.log, sm.askstring("Add solution", "Insert solution: "),
+                                   sm.askinteger("Add solution", "Priority: "),
+                                   ms.askyesno("Add solution", "Is solved?"))
+            self.master.iconify()
         elif inp == "Solve":
-            pass
+            print("Not implemented yet")
         elif inp == "Setting":
             settings.init_settings()
         elif inp == "About":
-            help.Help_Dialog("./ABOUT")
+            help.Help_Dialog(data_file="./ABOUT")
         elif inp == "Licence":
-            help.Help_Dialog("./LICENCE")
+            help.Help_Dialog(data_file="./LICENCE")
         elif inp == "PlsHelp":
-            help.Help_Dialog("./README.md")
+            help.Help_Dialog(data_file="./README.md")
         elif inp == "Update":
             print("Not implemented yet")
 

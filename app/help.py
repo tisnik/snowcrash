@@ -3,10 +3,13 @@ from tkinter import *
 
 class Help_Dialog:
 
-    def __init__(self, data_file):
+    def __init__(self, data_file=None, data=None):
         self.window = Tk()
         self.file_text = ""
-        self.load_text(data_file)
+        if data_file is not None:
+            self.load_text(data_file)
+        else:
+            self.file_text = data
         self.add_components()
         self.window.mainloop()
 
