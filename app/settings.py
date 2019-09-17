@@ -50,7 +50,7 @@ class Settings(Frame):
         self.db = None
         self.theme = None
         self.parent = parent
-        self.setting = import_setting("config.json")
+        self.setting = import_setting("app/config.json")
         self.list_of_pages = ['Database', 'Theme', 'Close']
         self.pack(fill=BOTH, expand=True)
         self.init_list_settings()
@@ -69,7 +69,7 @@ class Settings(Frame):
         elif selection == 1:
             self.show_theme_settings()
         elif selection == self.listbox.size() - 1:
-            self.parent.quit()
+            self.parent.destroy()
 
     def show_db_settings(self):
         if self.theme is not None:
@@ -91,8 +91,8 @@ class DBSettings(Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.setting = import_setting("config.json")
-        self.db_file_file = setting["db-path"]
+        self.setting = import_setting("app/config.json")
+        self.db_file_file = self.setting["db-path"]
         self.pack(side=LEFT, ipadx=10000, fill=BOTH, expand=True)
         self.show_settings()
 
@@ -116,10 +116,10 @@ class DBSettings(Frame):
 
     def onclick_event(self, button):
         if button == 'cancel':
-            self.parent.parent.quit()
+            self.parent.parent.destroy()
         elif button == 'ok':
             self.db_file_file = self.db_file.get()
-            self.parent.parent.quit()
+            self.parent.parent.destroy()
         elif button == 'apply':
             self.db_file_file = self.db_file.get()
         elif button == 'select_file':
@@ -133,7 +133,7 @@ class ThemeSettings(Frame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.setting = import_setting("config.json")
+        self.setting = import_setting("app/config.json")
         self.color = self.setting["color"]
         self.pack(side=LEFT, ipadx=10000, fill="both", expand=True)
         self.show_settings()
@@ -159,18 +159,18 @@ class ThemeSettings(Frame):
             self.color_picker.config(bg=self.color)
             self.setting["color"] = self.color
         elif button == 'ok':
-            export_setting(self.setting, "config.json")
-            self.parent.parent.quit()
+            export_setting(self.setting, "app/config.json")
+            self.parent.parent.destroy()
         elif button == 'apply':
             self.parent.parent.tk_setPalette(self.color)
         elif button == 'cancel':
-            self.parent.parent.quit()
+            self.parent.parent.destroy()
 
 
 def init_settings():
     window = Tk()
-    setting = import_setting("config.json")
-    window.wm_attributes('-type', 'splash')
+    setting = import_setting("app/config.json")
+    window.overrideredirect(1)
     window.geometry(setting["geometry"])
     color = setting["color"]
     window.tk_setPalette(color)

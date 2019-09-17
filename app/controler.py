@@ -1,7 +1,9 @@
-import subprocess
-from app import bug_search, language_identity
-from app.sql_database import Sql_database
-
+try:
+    from app import bug_search, language_identity
+    from app.sql_database import Sql_database
+except:
+    import bug_search, language_identity
+    from sql_database import Sql_database
 
 def show_db(event=False):
     """Printout all errors in DB"""
