@@ -175,7 +175,7 @@ class Gui:
         elif inp == "LoadLog":
             pass
         elif inp == "RATGL":
-            controler.run_app()
+            controler.run_app("")
         elif inp == "NoneDB":
             controler.get_processed_log(self.log)
         elif inp == "WithDB":
@@ -189,11 +189,11 @@ class Gui:
         elif inp == "Setting":
             settings.init_settings()
         elif inp == "About":
-            help.Help_Dialog("../ABOUT")
+            help.Help_Dialog("./ABOUT")
         elif inp == "Licence":
-            help.Help_Dialog("../LICENCE")
+            help.Help_Dialog("./LICENCE")
         elif inp == "PlsHelp":
-            help.Help_Dialog("../README.md")
+            help.Help_Dialog("./README.md")
         elif inp == "Update":
             print("Not implemented yet")
 

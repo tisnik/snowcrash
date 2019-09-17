@@ -29,4 +29,4 @@ class Help_Dialog:
         label.config(xscrollcommand=scrollbar.set)
 
     def on_ok(self):
-        self.window.quit()
+        self.window.destroy()
