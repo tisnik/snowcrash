@@ -1,3 +1,4 @@
+import platform
 from tkinter import *
 import tkinter.simpledialog as sm
 import tkinter.messagebox as ms
@@ -8,7 +9,6 @@ try:
 except:
     import settings, controler, help
 
-
 class Gui:
     def __init__(self):
         self.info_function=""
@@ -18,7 +18,8 @@ class Gui:
         self.master.geometry("500x500+0+0")
         self.master.minsize(300,180)
         self.master.tk_setPalette(self.settings['color'])
-        self.master.overrideredirect(1)
+        if platform.system() == 'Windows':
+            self.master.overrideredirect(True)
         self.outline_window = Frame(self.master, bg="Black", cursor="fleur")
         self.outline_window.pack(fill=BOTH)
         self.window = Frame(self.outline_window, cursor="arrow")
@@ -51,7 +52,7 @@ class Gui:
                                   ["Load log", lambda: self.info("LoadLog")],
                                   ["Run app to get log", lambda: self.info("RATGL")],
                                   ["Set random Palette  Ctrl+P", self.change_palette],
-                                  ["Exit", self.master.quit]]],
+                                  ["Exit", lambda: exit(0)]]],
                                 ["Run", "Menu",
                                  [["Withou DB    Ctrl+Shift+R", lambda: self.info("NoneDB")],
                                   ["With DB        Ctrl+R", lambda: self.info("WithDB")],
@@ -64,7 +65,7 @@ class Gui:
                                   ["Licence", lambda: self.info("Licence")],
                                   ["Pls help", lambda: self.info("PlsHelp")],
                                   ["Update", lambda: self.info("Update")]]],
-                                ["X", "Button_right", self.master.quit],
+                                ["X", "Button_right", lambda: exit(0)],
                                 [u"⃞", "Button_right", self.maxmalize],
                                 ["_", "Button_right", self.minimalize],
                                 [u"⛄  SnowCrash", "Label_Center"]]
@@ -124,7 +125,8 @@ class Gui:
         if self.master.state() == 'iconic':
             self.master.overrideredirect(0)
         else:
-            self.master.overrideredirect(1)
+            if platform.system() == 'Windows':
+                self.master.overrideredirect(1)
 
     def change_palette(self,null=False):
         color="#{:06x}".format(randint(0, 0xFFFFFF))
@@ -226,7 +228,6 @@ class Gui:
             self.log=filename.read()
             filename.close()
         elif inp == "RATGL":
-<<<<<<< HEAD
             self.master.withdraw()
             d = sm.askstring("Run app to get log", "Enter Command: ", parent=self.window)
             d = d.split(" ")
@@ -234,9 +235,6 @@ class Gui:
             self.master.deiconify()
             print(d)
             self.log = d
-=======
-            controler.run_app("Add it")
->>>>>>> Make it functionable on windows
         elif inp == "NoneDB":
             text = controler.get_processed_log(self.log)
             print(text)
