@@ -1,3 +1,4 @@
+import subprocess
 from app import bug_search, language_identity
 from app.sql_database import Sql_database
 
@@ -13,18 +14,18 @@ def show_db(event=False):
     return text
 
 
-def get_processed_log(log,event=False):
+def get_processed_log(log, event=False):
     """Processing log to object"""
     clear_log = bug_search.get_error_from_log(log)
     return language_identity.identify(clear_log)
 
 
-def print_log(log,event=False):
+def print_log(log, event=False):
     """Printing processed log"""
     print(get_processed_log(log))
 
 
-def load_from_file(filename,event=False):
+def load_from_file(filename, event=False):
     """Loading log from file"""
     data = ""
     with open(filename) as f:
@@ -33,7 +34,7 @@ def load_from_file(filename,event=False):
     return data
 
 
-def process_log(log,event=False):
+def process_log(log, event=False):
     """Processing log and adding to the DB"""
     error = get_processed_log(log)
     db = Sql_database()
@@ -41,12 +42,13 @@ def process_log(log,event=False):
     return str(error) + ": ", {True: "Success", False: "Failed"}[success]
 
 
-def add_solution(log, solution, priority, solved,event=False):
+def add_solution(log, solution, priority, solved, event=False):
     log = get_processed_log(log)
     db = Sql_database()
     db.add_solution(type(log).__name__.replace("_error", ""), log.error_type, priority, solution, solved)
 
 
-def run_app(pathToApp):
-    log = pathToApp
-    return log
+def run_app(commnad: list):
+    out = subprocess.Popen(commnad, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    stdout, stderr = out.communicate()
+    return stdout
