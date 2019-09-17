@@ -18,12 +18,11 @@ for i in range(len(errors)):
     errors[i] = bug_search.get_error_from_log(errors[i].read())
 for i in range(len(errors)):
     pass
-    #errors[i] = language_identity.identify(errors[i])
-    #sql_database.add_Error(errors[i])
+    # errors[i] = language_identity.identify(errors[i])
+    # sql_database.add_Error(errors[i])
 
-    
+
 # try something
 test = Sql_database()  # Create Test connect to database memory.db
-#print("Deleted?")
-#print(test.restart_all())
-
+# print("Deleted?")
+# print(test.restart_all())
