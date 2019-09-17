@@ -1,8 +1,12 @@
 from sqlite3 import *
 import os
 import sys
-from app import constants
-from app import ErrorClass, settings
+try:
+    from app import constants
+    from app import ErrorClass
+except:
+    import constants
+    import ErrorClass
 
 
 class Sql_database:

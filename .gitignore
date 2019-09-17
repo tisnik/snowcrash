@@ -5,3 +5,4 @@ __pycache__/
 .vscode/
 venv
 tempCodeRunnerFile.py
+config.json

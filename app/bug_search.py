@@ -1,5 +1,9 @@
-from app import constants
-from app.ErrorClass import *
+try:
+    from app import constants
+    from app.ErrorClass import *
+except:
+    import constants
+    from ErrorClass import *
 import re
 
 ''' Getting start line of error'''
