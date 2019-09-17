@@ -2,12 +2,12 @@ from sqlite3 import *
 import os
 import sys
 from app import constants
-from app import ErrorClass
+from app import ErrorClass, settings
 
 
 class Sql_database:
 
-    def __init__(self, db_path="memory.db"):
+    def __init__(self, db_path=settings.import_setting("app/config.json")["db-path"]):
         self.conn = None
         self.key = None
         self.db_path = db_path
@@ -217,7 +217,7 @@ class Sql_database:
         Variables must be defined, even those that are optional.
         If you don't want to set a variable, enter it as False.
         """
-        insert = "INSERT INTO {}({}) VALUES(\'{}\');"
+        insert = "INSERT INTO {}({}) VALUES({});"
         values = {'Error': {"Path": None, "Line": None, "MSG": None,
                             "First": None, "Last": None, "TypeID": None},
                 'Type': {"TypeName": None, "MSG": None, "LanguageID": None},
